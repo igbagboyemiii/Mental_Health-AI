@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "MindGuard — Mental Health Monitor",
+  "version": "1.0.0",
+  "description": "Opt-in text monitoring for emotional distress detection. Connects to your local MindGuard backend.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://localhost:8000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "exclude_matches": [
+        "https://accounts.google.com/*",
+        "https://*.paypal.com/*",
+        "https://*.stripe.com/*"
+      ]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "MindGuard"
+  }
+}

@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  # ─────────────────────────────────────────────────────────────
+  # FastAPI Backend — AI Risk Analysis API
+  # ─────────────────────────────────────────────────────────────
+  api:
+    build: .
+    container_name: mindguard-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DB_PATH=/data/monitor_history.db
+    volumes:
+      # Persist SQLite database across container restarts
+      - mindguard_data:/data
+      # Mount embeddings so they are not re-downloaded every build
+      - ./dreaddit_embeddings.npy:/app/dreaddit_embeddings.npy:ro
+      - ./dreaddit_embedding_index.csv:/app/dreaddit_embedding_index.csv:ro
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - mindguard_net
+
+  # ─────────────────────────────────────────────────────────────
+  # Telegram Bot — connects to api service
+  # ─────────────────────────────────────────────────────────────
+  bot:
+    build: .
+    container_name: mindguard-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - BACKEND_URL=http://api:8000
+      - DB_PATH=/data/monitor_history.db
+    volumes:
+      - mindguard_data:/data
+    command: ["python", "mindguard_bot.py"]
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mindguard_net
+
+volumes:
+  mindguard_data:
+    driver: local
+
+networks:
+  mindguard_net:
+    driver: bridge

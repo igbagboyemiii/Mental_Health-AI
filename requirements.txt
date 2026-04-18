@@ -1,0 +1,39 @@
+# MindGuard — Python Dependencies
+# Install:  pip install -r requirements.txt
+
+# ── Web framework ─────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+httpx>=0.27.0
+python-multipart>=0.0.9
+
+# ── AI / ML ───────────────────────────────────────────────────
+sentence-transformers>=2.7.0
+faiss-cpu>=1.8.0
+numpy>=1.26.0
+openai>=1.30.0          # used with Groq base_url
+tiktoken>=0.7.0
+
+# ── Data ──────────────────────────────────────────────────────
+pandas>=2.2.0
+
+# ── Config ────────────────────────────────────────────────────
+python-dotenv>=1.0.0
+pydantic>=2.7.0
+
+# ── Telegram Bot ──────────────────────────────────────────────
+python-telegram-bot>=21.0
+
+# ── HTTP client ───────────────────────────────────────────────
+requests>=2.31.0
+
+# ── Desktop monitoring (Windows/Linux/macOS) ──────────────────
+pynput>=1.7.6
+pyperclip>=1.8.2
+pygetwindow>=0.0.9
+
+# ── Desktop GUI ───────────────────────────────────────────────
+PyQt6>=6.7.0
+
+# ── Async ─────────────────────────────────────────────────────
+nest-asyncio>=1.6.0
