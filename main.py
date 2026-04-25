@@ -6,6 +6,7 @@
 import os
 import re
 import json
+import uuid
 import asyncio
 import numpy as np
 import nest_asyncio
@@ -448,6 +449,7 @@ async def lifespan(app: FastAPI):
     global db_store
     load_resources()
     db_store = MonitorStorage()
+    db_store.migrate()   # non-destructive: adds new columns to existing DBs
     print(f"🚀 API ready — {faiss_index.ntotal} vectors loaded")
     yield
     if db_store:
@@ -526,10 +528,12 @@ async def analyze_text(request: TextAnalysisRequest,
         # ── Trigger crisis protocol if needed ────────────────────────────────
         if assessment["risk_level"] in ("high", "crisis"):
             crisis_engine.handle_crisis(
-                user_id = user_id,
-                text    = request.text,
-                score   = assessment["composite_score"] / 10,
-                source  = "api",
+                user_id      = user_id,
+                text         = request.text,
+                score        = assessment["composite_score"] / 10,
+                source       = "api",
+                db_store     = db_store,
+                watched_name = user_id,
             )
 
         return build_response(request.text, assessment, rag_resp, similar)
@@ -718,10 +722,12 @@ async def assess_indicators(input_data: AssessmentInput):
     # ── Crisis protocol ─────────────────────────────────────────────
     if tier == "CRISIS":
         crisis_engine.handle_crisis(
-            user_id = "desktop",
-            text    = classification.rag_query,
-            score   = scoring.composite_score,
-            source  = "desktop_assessment",
+            user_id      = "desktop",
+            text         = classification.rag_query,
+            score        = scoring.composite_score,
+            source       = "desktop_assessment",
+            db_store     = db_store,
+            watched_name = "desktop",
         )
 
     return {
@@ -821,13 +827,267 @@ async def get_audit_log(
         raise HTTPException(status_code=503, detail="Storage not initialized")
     return {"rows": db_store.query_audit(limit=limit)}
 
+# ─────────────────────────────────────────────────────────────
+# AUTH / CONSENT / GUARDIAN ENDPOINTS
+# ─────────────────────────────────────────────────────────────
+
+class RegisterRequest(BaseModel):
+    username     : str  = Field(..., min_length=2, max_length=60)
+    email        : str  = Field(..., min_length=5, max_length=120)
+    display_name : str  = Field(default="",  max_length=80)
+    country_code : str  = Field(default="GLOBAL", max_length=2)
+    consent      : bool = Field(..., description="User must explicitly consent to monitoring")
+
+    model_config = {"json_schema_extra": {"example": {
+        "username"    : "alice",
+        "email"       : "alice@example.com",
+        "display_name": "Alice",
+        "country_code": "NG",
+        "consent"     : True,
+    }}}
 
 
+class GuardianRequest(BaseModel):
+    user_id        : str = Field(...)
+    guardian_email : str = Field(..., min_length=5)
+    guardian_name  : str = Field(default="")
+    relationship   : str = Field(default="guardian",
+                                  description="e.g. parent, friend, counselor, guardian")
+
+
+@app.post("/auth/register", tags=["Auth"])
+async def register_user(req: RegisterRequest):
+    """
+    Register a new user and record their monitoring consent.
+    Returns a stable user_id to store in the browser extension.
+    """
+    if not req.consent:
+        raise HTTPException(
+            status_code=400,
+            detail="Consent is required to use MindGuard monitoring."
+        )
+    if db_store is None:
+        raise HTTPException(status_code=503, detail="Storage not initialized")
+
+    user_id = f"ext:{uuid.uuid4().hex[:12]}"
+    db_store.save_consent(
+        user_id      = user_id,
+        username     = req.username,
+        country_code = req.country_code,
+        email        = req.email,
+        display_name = req.display_name or req.username,
+    )
+    db_store.log_audit(
+        user_id    = user_id,
+        endpoint   = "/auth/register",
+        risk_level = "none",
+        score      = 0.0,
+        source     = "browser_extension",
+    )
+    return {
+        "user_id"      : user_id,
+        "username"     : req.username,
+        "display_name" : req.display_name or req.username,
+        "consented"    : True,
+        "message"      : "Registration successful. Monitoring is now active.",
+    }
+
+
+@app.get("/auth/me", tags=["Auth"])
+async def get_user_profile(
+    user_id: str = Query(..., description="User ID returned at registration")
+):
+    """Return the registered user profile for a given user_id."""
+    if db_store is None:
+        raise HTTPException(status_code=503, detail="Storage not initialized")
+    user = db_store.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    # Strip sensitive fields before returning
+    user.pop("email", None)
+    return user
+
+
+@app.post("/auth/guardian", tags=["Auth"])
+async def add_guardian(req: GuardianRequest):
+    """
+    Register a guardian (parent / friend / counselor) for a monitored user.
+    The guardian will be emailed when a CRISIS event is detected.
+    """
+    if db_store is None:
+        raise HTTPException(status_code=503, detail="Storage not initialized")
+    if not db_store.has_consented(req.user_id):
+        raise HTTPException(
+            status_code=404,
+            detail="User not found or has not completed registration."
+        )
+    db_store.add_guardian(
+        user_id        = req.user_id,
+        guardian_email = req.guardian_email,
+        guardian_name  = req.guardian_name,
+        relationship   = req.relationship,
+    )
+    db_store.log_audit(
+        user_id    = req.user_id,
+        endpoint   = "/auth/guardian",
+        risk_level = "none",
+        score      = 0.0,
+        source     = "browser_extension",
+    )
+    return {
+        "user_id"        : req.user_id,
+        "guardian_email" : req.guardian_email,
+        "relationship"   : req.relationship,
+        "message"        : f"Guardian {req.guardian_email!r} added. They will be notified on CRISIS events.",
+    }
+
+
+@app.delete("/auth/guardian", tags=["Auth"])
+async def remove_guardian(
+    user_id        : str = Query(...),
+    guardian_email : str = Query(...),
+):
+    """Remove a guardian contact from a user's account."""
+    if db_store is None:
+        raise HTTPException(status_code=503, detail="Storage not initialized")
+    db_store.remove_guardian(user_id, guardian_email)
+    return {"message": f"Guardian {guardian_email!r} removed."}
+
+
+@app.get("/auth/guardians/{user_id}", tags=["Auth"])
+async def list_guardians(user_id: str):
+    """Return all registered guardians for a given user."""
+    if db_store is None:
+        raise HTTPException(status_code=503, detail="Storage not initialized")
+    guardians = db_store.get_guardians(user_id)
+    return {"user_id": user_id, "guardians": guardians, "total": len(guardians)}
 
 
 # ─────────────────────────────────────────────────────────────
-# WEBSOCKET — Real-Time Text Analysis Stream
+# ANALYZE/CONTEXT — Rolling Context Window
 # ─────────────────────────────────────────────────────────────
+
+class ContextWindowRequest(BaseModel):
+    user_id       : str             = Field(...)
+    texts         : list[str]       = Field(..., min_length=1,
+                                            description="Last N text flushes (newest last)")
+    session_avg   : Optional[float] = Field(default=None, ge=0.0, le=10.0,
+                                            description="Pre-computed avg score from extension")
+    session_max   : Optional[float] = Field(default=None, ge=0.0, le=10.0)
+    session_count : Optional[int]   = Field(default=None, ge=0)
+    window_days   : int             = Field(default=14, ge=1, le=30)
+
+
+@app.post("/analyze/context", tags=["Analysis"])
+async def analyze_context_window(req: ContextWindowRequest):
+    """
+    Evaluate a rolling context window of text flushes.
+
+    Accepts the last N flushed texts from the browser extension (the extension
+    pre-filters to the last 5 raw texts to keep payload small) plus optional
+    pre-aggregated session statistics covering up to 14 days.
+
+    Returns:
+      - Per-text risk scores
+      - Window aggregate (avg, max, trend)
+      - Backend temporal summary (if user is registered)
+      - Whether escalation is detected
+    """
+    if db_store is None:
+        raise HTTPException(status_code=503, detail="Storage not initialized")
+
+    results = []
+    for text in req.texts[-5:]:   # cap at last 5 to bound payload
+        if text and len(text.strip()) >= 10:
+            assessment = full_risk_assessment(text=text, sentiment=0.0)
+            results.append({
+                "text"           : text[:200],
+                "composite_score": assessment["composite_score"],
+                "risk_level"     : assessment["risk_level"],
+            })
+            # Store each text in temporal context
+            db_store.add_temporal_event(
+                user_id         = req.user_id,
+                risk_level      = assessment["risk_level"],
+                composite_score = assessment["composite_score"] / 10,
+                text            = text,
+            )
+
+    # Merge extension-side aggregates with fresh scores
+    scores    = [r["composite_score"] for r in results]
+    live_avg  = round(sum(scores) / len(scores), 2) if scores else 0.0
+    live_max  = round(max(scores), 2) if scores else 0.0
+
+    # Backend temporal summary (up to window_days)
+    temporal  = db_store.get_temporal_summary(req.user_id, days=req.window_days)
+    escalating = db_store.detect_escalation(req.user_id)
+
+    # Merged aggregate (extension stats + live scores)
+    merged_avg = live_avg
+    merged_max = live_max
+    if req.session_avg is not None:
+        merged_avg = round((live_avg + req.session_avg) / 2, 2)
+    if req.session_max is not None:
+        merged_max = round(max(live_max, req.session_max), 2)
+
+    # Trigger crisis if merged_max is critical and user is registered
+    if merged_max >= 7.5:
+        user_rec = db_store.get_user(req.user_id)
+        name     = (user_rec or {}).get("display_name", req.user_id)
+        crisis_engine.handle_crisis(
+            user_id      = req.user_id,
+            text         = req.texts[-1] if req.texts else "",
+            score        = merged_max / 10,
+            source       = "browser_extension_context",
+            db_store     = db_store,
+            watched_name = name,
+        )
+
+    db_store.log_audit(
+        user_id    = req.user_id,
+        endpoint   = "/analyze/context",
+        risk_level = "high" if merged_max >= 7.0 else "medium" if merged_max >= 4.0 else "low",
+        score      = merged_max,
+        source     = "browser_extension",
+    )
+
+    return {
+        "user_id"         : req.user_id,
+        "live_results"    : results,
+        "live_avg"        : live_avg,
+        "live_max"        : live_max,
+        "merged_avg"      : merged_avg,
+        "merged_max"      : merged_max,
+        "session_count"   : req.session_count,
+        "temporal_summary": temporal,
+        "escalating"      : escalating,
+        "crisis_triggered": merged_max >= 7.5,
+    }
+
+
+# ─────────────────────────────────────────────────────────────
+# CRISIS HISTORY — Guardian-facing event log
+# ─────────────────────────────────────────────────────────────
+
+@app.get("/crisis/history/{user_id}", tags=["Crisis"])
+async def get_crisis_history(
+    user_id : str,
+    limit   : int = Query(default=20, ge=1, le=100),
+):
+    """
+    Return the stored CRISIS events for a user.
+    Intended for guardian dashboards to review past alerts.
+    """
+    if db_store is None:
+        raise HTTPException(status_code=503, detail="Storage not initialized")
+    events = db_store.get_crisis_events(user_id, limit=limit)
+    return {
+        "user_id" : user_id,
+        "total"   : len(events),
+        "events"  : events,
+    }
+
+
 #
 # Flow:
 #   1. Desktop app connects to ws://localhost:8000/ws/analyze

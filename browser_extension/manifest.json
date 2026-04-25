@@ -1,12 +1,13 @@
 {
   "manifest_version": 3,
   "name": "MindGuard — Mental Health Monitor",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Opt-in text monitoring for emotional distress detection. Connects to your local MindGuard backend.",
   "permissions": [
     "activeTab",
     "storage",
-    "alarms"
+    "alarms",
+    "notifications"
   ],
   "host_permissions": [
     "http://localhost:8000/*"

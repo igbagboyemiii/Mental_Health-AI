@@ -19,11 +19,21 @@
 #   Table: user_sessions  (persistent consent store)
 #     user_id           TEXT     — unique user identifier (PK)
 #     username          TEXT
+#     email             TEXT     — registered email address (NEW)
+#     display_name      TEXT     — friendly display name (NEW)
 #     consented_at      TEXT     — ISO-8601 datetime
 #     monitoring_active INTEGER  — 1 = active, 0 = paused
 #     country_code      TEXT     — ISO-3166-1 alpha-2 (default "GLOBAL")
 #
-#   Table: temporal_context  (30-day rolling window per user)
+#   Table: guardians  (people registered to watch for a monitored user)
+#     id                INTEGER  — auto-increment primary key
+#     user_id           TEXT     — FK → user_sessions.user_id
+#     guardian_email    TEXT     — contact email
+#     guardian_name     TEXT     — display name
+#     relationship      TEXT     — e.g. "parent", "friend", "counselor"
+#     added_at          TEXT     — ISO-8601 datetime
+#
+#   Table: temporal_context  (rolling 30-day window per user)
 #     id            INTEGER  — auto-increment primary key
 #     user_id       TEXT     — foreign key → user_sessions.user_id
 #     timestamp     TEXT     — ISO-8601 datetime (indexed)
@@ -39,6 +49,16 @@
 #     risk_level    TEXT
 #     score         REAL
 #     source        TEXT
+#
+#   Table: crisis_events  (record of CRISIS alerts + guardian notification status)
+#     id                  INTEGER  — auto-increment primary key
+#     timestamp           TEXT     — ISO-8601 datetime
+#     user_id             TEXT     — FK → user_sessions.user_id
+#     score               REAL     — composite risk score that triggered the event
+#     source              TEXT     — origin system
+#     text_snippet        TEXT     — first 300 chars of flagged text
+#     guardians_notified  INTEGER  — number of guardian emails sent
+#     clinician_notified  INTEGER  — 1 if clinician email sent, 0 otherwise
 # ─────────────────────────────────────────────────────────────
 
 import sqlite3
@@ -94,10 +114,47 @@ class MonitorStorage:
                 CREATE TABLE IF NOT EXISTS user_sessions (
                     user_id           TEXT    PRIMARY KEY,
                     username          TEXT,
+                    email             TEXT,
+                    display_name      TEXT,
                     consented_at      TEXT    NOT NULL,
                     monitoring_active INTEGER NOT NULL DEFAULT 1,
                     country_code      TEXT    NOT NULL DEFAULT 'GLOBAL'
                 );
+
+                -- Allow upgrading existing DBs without losing data
+                -- (SQLite ignores ADD COLUMN if it already exists via IF NOT EXISTS workaround)
+                CREATE TABLE IF NOT EXISTS _schema_migrations (
+                    version INTEGER PRIMARY KEY
+                );
+
+                -- ── Guardians (registered watchers) ───────────────────
+                CREATE TABLE IF NOT EXISTS guardians (
+                    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id        TEXT    NOT NULL,
+                    guardian_email TEXT    NOT NULL,
+                    guardian_name  TEXT,
+                    relationship   TEXT    NOT NULL DEFAULT 'guardian',
+                    added_at       TEXT    NOT NULL,
+                    UNIQUE(user_id, guardian_email)
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_guardians_user
+                    ON guardians (user_id);
+
+                -- ── Crisis events audit trail ──────────────────────────
+                CREATE TABLE IF NOT EXISTS crisis_events (
+                    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp           TEXT    NOT NULL,
+                    user_id             TEXT    NOT NULL,
+                    score               REAL,
+                    source              TEXT,
+                    text_snippet        TEXT,
+                    guardians_notified  INTEGER NOT NULL DEFAULT 0,
+                    clinician_notified  INTEGER NOT NULL DEFAULT 0
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_crisis_user
+                    ON crisis_events (user_id, timestamp);
 
                 -- ── Temporal context (rolling 30-day window) ──────────
                 CREATE TABLE IF NOT EXISTS temporal_context (
@@ -245,23 +302,47 @@ class MonitorStorage:
         row = cur.fetchone()
         return dict(row) if row else {}
 
+    # ── Schema Migration (live DB upgrade) ───────────────────
+
+    def migrate(self) -> None:
+        """
+        Apply non-destructive ALTER TABLE migrations for existing databases
+        that pre-date the guardians / crisis_events schema additions.
+        """
+        migrations = [
+            "ALTER TABLE user_sessions ADD COLUMN email TEXT",
+            "ALTER TABLE user_sessions ADD COLUMN display_name TEXT",
+        ]
+        with self._lock:
+            for sql in migrations:
+                try:
+                    self._conn.execute(sql)
+                except Exception:
+                    pass   # column already exists — safe to ignore
+            self._conn.commit()
+
     # ── User Sessions (Persistent Consent) ────────────────────
 
     def save_consent(self, user_id: str, username: str,
-                     country_code: str = "GLOBAL") -> None:
+                     country_code: str = "GLOBAL",
+                     email: str = "",
+                     display_name: str = "") -> None:
         """Record or refresh consent for a user."""
         ts = datetime.now().isoformat(timespec="seconds")
         with self._lock:
             self._conn.execute(
                 """INSERT INTO user_sessions
-                   (user_id, username, consented_at, monitoring_active, country_code)
-                   VALUES (?, ?, ?, 1, ?)
+                   (user_id, username, email, display_name,
+                    consented_at, monitoring_active, country_code)
+                   VALUES (?, ?, ?, ?, ?, 1, ?)
                    ON CONFLICT(user_id) DO UPDATE SET
                        username          = excluded.username,
+                       email             = excluded.email,
+                       display_name      = excluded.display_name,
                        consented_at      = excluded.consented_at,
                        monitoring_active = 1,
                        country_code      = excluded.country_code""",
-                (str(user_id), username, ts, country_code)
+                (str(user_id), username, email, display_name, ts, country_code)
             )
             self._conn.commit()
 
@@ -379,6 +460,89 @@ class MonitorStorage:
         if len(recent) < 2:
             return False
         return recent[-1] > recent[0] and (recent[-1] - recent[0]) > 0.1
+
+    # ── Guardians ──────────────────────────────────────────────
+
+    def add_guardian(
+        self,
+        user_id        : str,
+        guardian_email : str,
+        guardian_name  : str  = "",
+        relationship   : str  = "guardian",
+    ) -> None:
+        """Register a guardian for a user. Duplicate emails are ignored."""
+        ts = datetime.now().isoformat(timespec="seconds")
+        with self._lock:
+            self._conn.execute(
+                """INSERT OR IGNORE INTO guardians
+                   (user_id, guardian_email, guardian_name, relationship, added_at)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (str(user_id), guardian_email.lower().strip(),
+                 guardian_name, relationship, ts)
+            )
+            self._conn.commit()
+
+    def remove_guardian(self, user_id: str, guardian_email: str) -> None:
+        """Remove a guardian contact from a user's account."""
+        with self._lock:
+            self._conn.execute(
+                "DELETE FROM guardians WHERE user_id = ? AND guardian_email = ?",
+                (str(user_id), guardian_email.lower().strip())
+            )
+            self._conn.commit()
+
+    def get_guardians(self, user_id: str) -> list[dict]:
+        """Return all guardian contacts for a given user."""
+        cur = self._conn.execute(
+            """SELECT id, guardian_email, guardian_name, relationship, added_at
+               FROM guardians WHERE user_id = ?
+               ORDER BY added_at ASC""",
+            (str(user_id),)
+        )
+        return [dict(row) for row in cur.fetchall()]
+
+    # ── Crisis Events ──────────────────────────────────────────
+
+    def log_crisis_event(
+        self,
+        user_id             : str,
+        score               : float,
+        source              : str  = "unknown",
+        text                : str  = "",
+        guardians_notified  : int  = 0,
+        clinician_notified  : bool = False,
+    ) -> int:
+        """
+        Record a CRISIS event in the crisis_events table.
+        Returns the new row id.
+        """
+        ts      = datetime.now().isoformat(timespec="seconds")
+        snippet = text[:300] if text else ""
+        with self._lock:
+            cur = self._conn.execute(
+                """INSERT INTO crisis_events
+                   (timestamp, user_id, score, source, text_snippet,
+                    guardians_notified, clinician_notified)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (ts, str(user_id), score, source, snippet,
+                 guardians_notified, int(clinician_notified))
+            )
+            self._conn.commit()
+            return cur.lastrowid
+
+    def get_crisis_events(
+        self,
+        user_id : str,
+        limit   : int = 50,
+    ) -> list[dict]:
+        """Return the most recent CRISIS events for a user."""
+        cur = self._conn.execute(
+            """SELECT * FROM crisis_events
+               WHERE user_id = ?
+               ORDER BY id DESC LIMIT ?""",
+            (str(user_id), limit)
+        )
+        return [dict(row) for row in cur.fetchall()]
 
     # ── Audit Log ──────────────────────────────────────────────
 
