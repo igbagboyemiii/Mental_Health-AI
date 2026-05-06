@@ -70,13 +70,47 @@ CRISIS_RESOURCES: dict[str, list[str]] = {
     ],
 }
 
+# Adolescent-specific crisis resources (age 10–24)
+ADOLESCENT_RESOURCES: dict[str, list[str]] = {
+    "NG": [
+        "Childline Nigeria: 116 (free, 24/7 for children)",
+        "MANI — Mentally Aware Nigeria Initiative: 08091110891",
+        "Nigeria Adolescent Health: nahip.fmoh.gov.ng",
+        "Nigeria Suicide Prevention Initiative: support@nsp-initiative.org",
+    ],
+    "US": [
+        "Crisis Text Line (Youth): text HOME to 741741",
+        "Teen Line: 800-852-8336 (6pm–10pm PT, teens for teens)",
+        "988 Suicide & Crisis Lifeline: call or text 988",
+        "The Trevor Project (LGBTQ+): 1-866-488-7386",
+        "Youth Crisis Text Line: text START to 678-678",
+    ],
+    "GB": [
+        "Childline: 0800 1111 (free, 24/7 for under-19s)",
+        "YoungMinds Crisis Messenger: text YM to 85258",
+        "Samaritans: 116 123 (free, 24/7)",
+        "Kooth — free online mental health support for young people: kooth.com",
+    ],
+    "GLOBAL": [
+        "Crisis Text Line: text HOME to 741741",
+        "findahelpline.com — worldwide localized crisis lines",
+        "befrienders.org — worldwide volunteer support",
+        "Childline International: childhelplineinternational.org",
+    ],
+}
 
-def get_crisis_resources(country_code: str = "GLOBAL") -> list[str]:
+
+def get_crisis_resources(
+    country_code  : str  = "GLOBAL",
+    is_adolescent : bool = True,
+) -> list[str]:
     """
     Return localized crisis hotline resources.
+    Prefers adolescent-specific lines when is_adolescent=True.
     Falls back to GLOBAL if country_code is not found.
     """
-    return CRISIS_RESOURCES.get(country_code.upper(), CRISIS_RESOURCES["GLOBAL"])
+    pool = ADOLESCENT_RESOURCES if is_adolescent else CRISIS_RESOURCES
+    return pool.get(country_code.upper(), pool["GLOBAL"])
 
 
 # ─────────────────────────────────────────────────────────────
@@ -186,21 +220,35 @@ def send_clinician_alert(
 # ─────────────────────────────────────────────────────────────
 
 def _build_guardian_email_html(
-    guardian_name : str,
-    watched_name  : str,
-    score         : float,
-    timestamp     : str,
-    resources     : list[str],
-    relationship  : str = "guardian",
+    guardian_name  : str,
+    watched_name   : str,
+    score          : float,
+    timestamp      : str,
+    resources      : list[str],
+    relationship   : str = "guardian",
+    ward_age       : int = 0,
 ) -> str:
     """
-    Build a warm, human-centred HTML email for a guardian/parent/friend.
-    Tone is supportive and actionable — NOT clinical.
+    Build a warm, human-centred HTML email for a guardian/parent.
+    Adolescent-aware: references the child's name and the guardian relationship.
     """
-    resource_html  = "".join(f"<li>{r}</li>" for r in resources)
-    salutation     = guardian_name.split()[0] if guardian_name else "there"
-    pct            = min(int(score * 100), 100)
-    bar_color      = "#ef4444" if pct >= 75 else ("#f97316" if pct >= 50 else "#f59e0b")
+    resource_html = "".join(f"<li>{r}</li>" for r in resources)
+    salutation    = guardian_name.split()[0] if guardian_name else "there"
+    pct           = min(int(score * 100), 100)
+    bar_color     = "#ef4444" if pct >= 75 else ("#f97316" if pct >= 50 else "#f59e0b")
+    age_note      = f" (age {ward_age})" if ward_age else ""
+    minor_note    = (
+        "<p style=\"font-size:13px; color:#7c3aed; background:#f5f3ff; "
+        "border:1px solid #ddd6fe; border-radius:6px; padding:10px 14px; margin:16px 0;\">\n"
+        "        <strong>Minor under your care</strong> — As "
+        f"{watched_name}'s {relationship}, you have been registered to receive these alerts "
+        "so you can provide timely support.\n      </p>"
+    ) if ward_age < 18 else (
+        "<p style=\"font-size:13px; color:#1d4ed8; background:#eff6ff; "
+        "border:1px solid #bfdbfe; border-radius:6px; padding:10px 14px; margin:16px 0;\">\n"
+        f"        <strong>Young adult (18+)</strong> — {watched_name} has agreed to allow you "
+        "to receive these support alerts.\n      </p>"
+    )
 
     return f"""
     <html><body style="font-family: 'Segoe UI', Arial, sans-serif;
@@ -216,7 +264,7 @@ def _build_guardian_email_html(
           MindGuard &mdash; Support Alert
         </div>
         <div style="font-size:13px; opacity:0.8; margin-top:4px;">
-          Someone you care about may need your support
+          {watched_name}{age_note} may need your support right now
         </div>
       </div>
 
@@ -225,6 +273,7 @@ def _build_guardian_email_html(
         <p style="font-size:16px; line-height:1.6; margin-top:0;">
           Hi <strong>{salutation}</strong>,
         </p>
+        {minor_note}
         <p style="font-size:15px; line-height:1.7; color:#4b5563;">
           MindGuard has detected patterns in <strong>{watched_name}</strong>&apos;s
           recent online activity that suggest they may be going through a difficult
@@ -265,7 +314,7 @@ def _build_guardian_email_html(
                     border-radius:8px; padding:16px 20px; margin:20px 0;">
           <div style="font-size:12px; color:#166534; font-weight:600;
                       letter-spacing:0.5px; text-transform:uppercase;
-                      margin-bottom:8px;">Crisis Resources (to share if needed)</div>
+                      margin-bottom:8px;">Youth Crisis Resources (to share if needed)</div>
           <ul style="color:#374151; font-size:13px; line-height:1.9; padding-left:20px; margin:0;">
             {resource_html}
           </ul>
@@ -276,9 +325,9 @@ def _build_guardian_email_html(
       <div style="background:#f9fafb; padding:16px 32px;
                   border-top:1px solid #e5e7eb;">
         <p style="font-size:11px; color:#9ca3af; margin:0; line-height:1.6;">
-          You are listed as a <strong>{relationship}</strong> for {watched_name}.
+          You are listed as <strong>{relationship}</strong> for {watched_name}{age_note}.
           This alert was sent automatically by {SYSTEM_NAME}.<br>
-          To update your contact preferences, reach out to the account holder.
+          To manage monitoring settings, visit your MindGuard Guardian Dashboard.
         </p>
       </div>
 
@@ -292,6 +341,7 @@ def send_guardian_alert(
     watched_name    : str,
     score           : float,
     resources       : list[str],
+    ward_age        : int = 0,
 ) -> bool:
     """
     Send a warm guardian alert email.
@@ -303,7 +353,7 @@ def send_guardian_alert(
         return False
 
     recipient     = guardian.get("guardian_email", "")
-    guardian_name = guardian.get("guardian_name", "") or recipient
+    guardian_name = guardian.get("guardian_name", "") or guardian.get("display_name", "") or recipient
     relationship  = guardian.get("relationship", "guardian")
     timestamp     = datetime.now().strftime("%Y-%m-%d %H:%M")
 
@@ -322,6 +372,7 @@ def send_guardian_alert(
         timestamp     = timestamp,
         resources     = resources,
         relationship  = relationship,
+        ward_age      = ward_age,
     )
     msg.attach(MIMEText(body_html, "html"))
 
@@ -410,9 +461,28 @@ class CrisisEngine:
             to_email = to_email,
         )
 
-        # 2. Notify guardians (if db_store supplied)
+        # 2. Notify guardians (legacy contacts from guardians table)
         guardians_notified = 0
+        ward_age = 0
+
         if db_store is not None:
+            # Compute ward age from DOB if available
+            try:
+                ward_rec = db_store.get_user(user_id)
+                dob_str  = (ward_rec or {}).get("date_of_birth", "")
+                if dob_str:
+                    from datetime import date as _Date
+                    dob = _Date.fromisoformat(dob_str)
+                    today = _Date.today()
+                    ward_age = today.year - dob.year - (
+                        (today.month, today.day) < (dob.month, dob.day)
+                    )
+            except Exception:
+                ward_age = 0
+
+            is_adolescent = 10 <= ward_age <= 24 if ward_age else True
+            resources = get_crisis_resources(country, is_adolescent=is_adolescent)
+
             try:
                 guardians = db_store.get_guardians(user_id)
                 for g in guardians:
@@ -421,11 +491,38 @@ class CrisisEngine:
                         watched_name = name,
                         score        = score,
                         resources    = resources,
+                        ward_age     = ward_age,
                     )
                     if ok:
                         guardians_notified += 1
             except Exception as exc:
                 logger.error(f"Guardian notification loop failed: {exc}")
+
+            # 2b. Also notify via guardian_ward_links (guardian account email)
+            try:
+                guardian_account = db_store.get_ward_guardian(user_id)
+                if guardian_account:
+                    ga_email = guardian_account.get("email", "")
+                    already_notified = any(
+                        g.get("guardian_email", "").lower() == ga_email.lower()
+                        for g in db_store.get_guardians(user_id)
+                    )
+                    if ga_email and not already_notified:
+                        ok = send_guardian_alert(
+                            guardian     = {
+                                "guardian_email": ga_email,
+                                "guardian_name" : guardian_account.get("display_name", ""),
+                                "relationship"  : guardian_account.get("relationship", "guardian"),
+                            },
+                            watched_name = guardian_account.get("ward_name", name),
+                            score        = score,
+                            resources    = resources,
+                            ward_age     = ward_age,
+                        )
+                        if ok:
+                            guardians_notified += 1
+            except Exception as exc:
+                logger.error(f"Guardian account notification failed: {exc}")
 
         # 3. Log to crisis_events table
         if db_store is not None:

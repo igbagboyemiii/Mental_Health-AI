@@ -5,263 +5,157 @@
   <title>MindGuard</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { width: 360px; min-height: 500px; background: #080c14; color: #cdd9f0;
+           font-family: 'Inter', system-ui, sans-serif; font-size: 13px; }
 
-    body {
-      width: 340px;
-      min-height: 480px;
-      background: #080c14;
-      color: #cdd9f0;
-      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-      font-size: 13px;
-    }
+    .header { background: linear-gradient(135deg,#0d1220,#0a1628); border-bottom:1px solid #1e2d45;
+              padding:14px 16px 10px; display:flex; align-items:center; gap:10px; }
+    .logo-dot { color:#06b6d4; font-size:18px; }
+    .header-title { font-size:16px; font-weight:700; color:#e8f0ff; letter-spacing:.5px; }
+    .header-sub { font-size:10px; color:#4a6080; margin-top:1px; }
 
-    /* ── Header ── */
-    .header {
-      background: linear-gradient(135deg, #0d1220 0%, #0a1628 100%);
-      border-bottom: 1px solid #1e2d45;
-      padding: 14px 16px 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo-dot  { color: #06b6d4; font-size: 18px; }
-    .header-title { font-size: 16px; font-weight: 700; color: #e8f0ff; letter-spacing: 0.5px; }
-    .header-sub   { font-size: 10px; color: #4a6080; margin-top: 1px; }
+    .tabs { display:flex; border-bottom:1px solid #1e2d45; background:#0a0f1c; }
+    .tab-btn { flex:1; padding:9px 4px; font-size:11px; font-weight:600; color:#4a6080;
+               background:none; border:none; border-bottom:2px solid transparent; cursor:pointer;
+               font-family:inherit; transition:color .2s,border-color .2s; }
+    .tab-btn:hover { color:#93c5fd; }
+    .tab-btn.active { color:#06b6d4; border-bottom-color:#06b6d4; }
+    .tab-panel { display:none; } .tab-panel.active { display:block; }
 
-    /* ── Tabs ── */
-    .tabs {
-      display: flex;
-      border-bottom: 1px solid #1e2d45;
-      background: #0a0f1c;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 9px 4px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #4a6080;
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      cursor: pointer;
-      letter-spacing: 0.3px;
-      transition: color 0.2s, border-color 0.2s;
-      font-family: inherit;
-    }
-    .tab-btn:hover         { color: #93c5fd; }
-    .tab-btn.active        { color: #06b6d4; border-bottom-color: #06b6d4; }
+    .toggle-row { display:flex; align-items:center; justify-content:space-between;
+                  padding:12px 16px; border-bottom:1px solid #1e2d45; }
+    .toggle-label { font-size:12px; color:#cdd9f0; }
+    .toggle-sub { font-size:10px; color:#4a6080; margin-top:2px; }
+    .switch { position:relative; display:inline-block; width:42px; height:22px; }
+    .switch input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; inset:0; background:#1e2d45; border-radius:22px; cursor:pointer; transition:background .25s; }
+    .slider::before { content:""; position:absolute; width:16px; height:16px; left:3px; top:3px;
+                      background:#4a6080; border-radius:50%; transition:transform .25s,background .25s; }
+    input:checked + .slider { background:#1d4ed8; }
+    input:checked + .slider::before { transform:translateX(20px); background:#e8f0ff; }
 
-    /* ── Tab Panels ── */
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
+    .risk-section { padding:12px 16px; border-bottom:1px solid #1e2d45; }
+    .risk-badge { display:flex; align-items:center; gap:10px; padding:10px 12px;
+                  border-radius:8px; border:1px solid #1e2d45; background:#111827; }
+    .risk-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+    .risk-label { font-weight:700; font-size:13px; }
+    .risk-score { font-size:11px; color:#4a6080; margin-top:2px; }
+    .risk-time { font-size:10px; color:#2a4a7f; margin-left:auto; white-space:nowrap; }
 
-    /* ── Toggle row ── */
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      border-bottom: 1px solid #1e2d45;
-    }
-    .toggle-label { font-size: 12px; color: #cdd9f0; }
-    .toggle-sub   { font-size: 10px; color: #4a6080; margin-top: 2px; }
-    .switch { position: relative; display: inline-block; width: 42px; height: 22px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute; inset: 0;
-      background: #1e2d45; border-radius: 22px; cursor: pointer;
-      transition: background 0.25s;
-    }
-    .slider::before {
-      content: "";
-      position: absolute;
-      width: 16px; height: 16px; left: 3px; top: 3px;
-      background: #4a6080; border-radius: 50%;
-      transition: transform 0.25s, background 0.25s;
-    }
-    input:checked + .slider              { background: #1d4ed8; }
-    input:checked + .slider::before     { transform: translateX(20px); background: #e8f0ff; }
+    .trend-row { display:flex; align-items:center; gap:6px; padding:8px 16px;
+                 border-bottom:1px solid #1e2d45; font-size:11px; color:#4a6080; }
+    .trend-chip { padding:2px 8px; border-radius:12px; font-size:10px; font-weight:600; }
+    .trend-escalating { background:#4c1d1d; color:#f87171; }
+    .trend-stable { background:#1a2d1a; color:#4ade80; }
+    .trend-improving { background:#1a2641; color:#60a5fa; }
 
-    /* ── Risk badge ── */
-    .risk-section  { padding: 12px 16px; border-bottom: 1px solid #1e2d45; }
-    .risk-badge {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px; border-radius: 8px;
-      border: 1px solid #1e2d45; background: #111827;
-    }
-    .risk-dot   { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-    .risk-label { font-weight: 700; font-size: 13px; }
-    .risk-score { font-size: 11px; color: #4a6080; margin-top: 2px; }
-    .risk-time  { font-size: 10px; color: #2a4a7f; margin-left: auto; white-space: nowrap; }
+    .stats-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;
+                 padding:10px 16px; border-bottom:1px solid #1e2d45; }
+    .stat-card { background:#111827; border:1px solid #1e2d45; border-radius:8px; padding:8px; text-align:center; }
+    .stat-val { font-size:18px; font-weight:700; color:#e8f0ff; }
+    .stat-key { font-size:9px; color:#4a6080; margin-top:2px; letter-spacing:.5px; }
 
-    /* Trend indicator */
-    .trend-row {
-      display: flex; align-items: center; gap: 6px;
-      padding: 8px 16px; border-bottom: 1px solid #1e2d45;
-      font-size: 11px; color: #4a6080;
-    }
-    .trend-chip {
-      padding: 2px 8px; border-radius: 12px;
-      font-size: 10px; font-weight: 600; letter-spacing: 0.3px;
-    }
-    .trend-escalating { background: #4c1d1d; color: #f87171; }
-    .trend-stable     { background: #1a2d1a; color: #4ade80; }
-    .trend-improving  { background: #1a2641; color: #60a5fa; }
-
-    /* ── Stats row ── */
-    .stats-row {
-      display: grid; grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px; padding: 10px 16px; border-bottom: 1px solid #1e2d45;
-    }
-    .stat-card {
-      background: #111827; border: 1px solid #1e2d45;
-      border-radius: 8px; padding: 8px; text-align: center;
-    }
-    .stat-val { font-size: 18px; font-weight: 700; color: #e8f0ff; }
-    .stat-key { font-size: 9px; color: #4a6080; margin-top: 2px; letter-spacing: 0.5px; }
-
-    /* ── History tab ── */
-    .history-filters {
-      display: flex; gap: 4px; padding: 10px 16px 6px;
-    }
-    .filter-btn {
-      flex: 1; padding: 5px 4px; font-size: 10px; font-weight: 600;
-      background: #111827; border: 1px solid #1e2d45; border-radius: 6px;
-      color: #4a6080; cursor: pointer; font-family: inherit;
-      transition: all 0.2s;
-    }
-    .filter-btn.active { background: #1e3a5f; border-color: #2563eb; color: #93c5fd; }
-
-    .score-dots {
-      padding: 8px 16px 6px;
-      display: flex; flex-wrap: wrap; gap: 4px;
-      min-height: 36px;
-    }
-    .score-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-      flex-shrink: 0; cursor: default;
-      transition: transform 0.15s;
-    }
-    .score-dot:hover { transform: scale(1.5); }
-
-    .history-summary {
-      padding: 8px 16px;
-      background: #0d1220;
-      border-top: 1px solid #1e2d45;
-      font-size: 11px; color: #4a6080;
-      display: flex; justify-content: space-between;
-    }
-    .history-summary span { color: #93c5fd; font-weight: 600; }
-
-    .reset-btn {
-      display: block; width: calc(100% - 32px); margin: 10px 16px;
-      padding: 8px; border-radius: 8px;
-      background: #1e2d45; border: 1px solid #2563eb;
-      color: #93c5fd; font-size: 11px; font-weight: 600;
-      cursor: pointer; font-family: inherit; text-align: center;
-      transition: all 0.2s;
-    }
-    .reset-btn:hover { background: #1e3a5f; }
+    .history-filters { display:flex; gap:4px; padding:10px 16px 6px; }
+    .filter-btn { flex:1; padding:5px 4px; font-size:10px; font-weight:600; background:#111827;
+                  border:1px solid #1e2d45; border-radius:6px; color:#4a6080; cursor:pointer; font-family:inherit; transition:all .2s; }
+    .filter-btn.active { background:#1e3a5f; border-color:#2563eb; color:#93c5fd; }
+    .score-dots { padding:8px 16px 6px; display:flex; flex-wrap:wrap; gap:4px; min-height:36px; }
+    .score-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; cursor:default; transition:transform .15s; }
+    .score-dot:hover { transform:scale(1.5); }
+    .history-summary { padding:8px 16px; background:#0d1220; border-top:1px solid #1e2d45;
+                       font-size:11px; color:#4a6080; display:flex; justify-content:space-between; }
+    .history-summary span { color:#93c5fd; font-weight:600; }
+    .reset-btn { display:block; width:calc(100% - 32px); margin:10px 16px; padding:8px; border-radius:8px;
+                 background:#1e2d45; border:1px solid #2563eb; color:#93c5fd; font-size:11px; font-weight:600;
+                 cursor:pointer; font-family:inherit; transition:all .2s; }
+    .reset-btn:hover { background:#1e3a5f; }
 
     /* ── Account tab ── */
-    .account-section { padding: 14px 16px; border-bottom: 1px solid #1e2d45; }
-    .account-section h3 {
-      font-size: 11px; font-weight: 600; color: #4a6080;
-      letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px;
-    }
+    .account-section { padding:14px 16px; border-bottom:1px solid #1e2d45; }
+    .account-section h3 { font-size:11px; font-weight:600; color:#4a6080;
+                          letter-spacing:.5px; text-transform:uppercase; margin-bottom:10px; }
+    .form-group { margin-bottom:8px; }
+    .form-group label { display:block; font-size:10px; color:#4a6080; margin-bottom:3px; }
+    .form-group input, .form-group select { width:100%; padding:7px 10px; font-size:12px;
+                                            background:#0d1220; border:1px solid #1e2d45; border-radius:6px;
+                                            color:#cdd9f0; font-family:inherit; outline:none; transition:border-color .2s; }
+    .form-group input:focus, .form-group select:focus { border-color:#2563eb; }
 
-    .form-group { margin-bottom: 8px; }
-    .form-group label { display: block; font-size: 10px; color: #4a6080; margin-bottom: 3px; }
-    .form-group input, .form-group select {
-      width: 100%; padding: 7px 10px; font-size: 12px;
-      background: #0d1220; border: 1px solid #1e2d45; border-radius: 6px;
-      color: #cdd9f0; font-family: inherit;
-      transition: border-color 0.2s;
-      outline: none;
-    }
-    .form-group input:focus, .form-group select:focus {
-      border-color: #2563eb;
-    }
+    .consent-check { display:flex; align-items:flex-start; gap:8px; font-size:11px; color:#4a6080; margin:8px 0; }
+    .consent-check input { width:auto; margin-top:1px; }
 
-    .consent-check {
-      display: flex; align-items: flex-start; gap: 8px;
-      font-size: 11px; color: #4a6080; margin: 8px 0;
-    }
-    .consent-check input { width: auto; margin-top: 1px; }
-    .consent-check a { color: #3b82f6; text-decoration: none; }
+    .submit-btn { width:100%; padding:9px; border-radius:8px;
+                  background:linear-gradient(135deg,#1d4ed8,#0ea5e9);
+                  border:none; color:#fff; font-size:12px; font-weight:600;
+                  cursor:pointer; font-family:inherit; transition:opacity .2s; }
+    .submit-btn:hover { opacity:.88; }
+    .submit-btn:disabled { opacity:.4; cursor:not-allowed; }
+    .link-btn-purple { background:linear-gradient(135deg,#4f46e5,#8b5cf6) !important; }
 
-    .submit-btn {
-      width: 100%; padding: 9px; border-radius: 8px;
-      background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
-      border: none; color: #fff; font-size: 12px; font-weight: 600;
-      cursor: pointer; font-family: inherit;
-      transition: opacity 0.2s;
-    }
-    .submit-btn:hover   { opacity: 0.88; }
-    .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    /* Step indicator */
+    .step-indicator { display:flex; align-items:center; gap:0; margin-bottom:12px; }
+    .step-dot { width:24px; height:24px; border-radius:50%; background:#1e2d45; border:2px solid #2563eb;
+                color:#4a6080; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+    .step-dot.active { background:#2563eb; color:#fff; }
+    .step-dot.done { background:#10b981; border-color:#10b981; color:#fff; }
+    .step-line { flex:1; height:2px; background:#1e2d45; }
+    .step-line.done { background:#10b981; }
+    .step-label { font-size:9px; color:#4a6080; text-align:center; margin-top:4px; }
 
-    /* Profile card (shown when logged in) */
-    .profile-card {
-      background: #111827; border: 1px solid #1e2d45;
-      border-radius: 8px; padding: 12px; margin-bottom: 10px;
-    }
-    .profile-name { font-size: 14px; font-weight: 700; color: #e8f0ff; }
-    .profile-id   { font-size: 9px; color: #2a4a7f; margin-top: 2px; font-family: monospace; }
-    .profile-badge {
-      display: inline-block; padding: 2px 8px; border-radius: 12px;
-      background: #1a3a2a; color: #4ade80; font-size: 10px; font-weight: 600;
-      margin-top: 6px;
-    }
+    /* Step panels */
+    .step-panel { display:none; } .step-panel.active { display:block; }
 
-    /* Guardian list */
-    .guardian-list { margin: 6px 0; }
-    .guardian-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 7px 10px; background: #0d1220; border: 1px solid #1e2d45;
-      border-radius: 6px; margin-bottom: 5px;
-    }
-    .guardian-email  { font-size: 11px; color: #93c5fd; }
-    .guardian-rel    { font-size: 9px; color: #4a6080; margin-top: 1px; }
-    .guardian-remove {
-      background: none; border: none; color: #4a6080;
-      cursor: pointer; font-size: 14px; padding: 2px 4px;
-      transition: color 0.2s;
-    }
-    .guardian-remove:hover { color: #ef4444; }
+    /* Profile card */
+    .profile-card { background:#111827; border:1px solid #1e2d45; border-radius:8px; padding:12px; margin-bottom:10px; }
+    .profile-name { font-size:14px; font-weight:700; color:#e8f0ff; }
+    .profile-id { font-size:9px; color:#2a4a7f; margin-top:2px; font-family:monospace; }
+    .profile-badge { display:inline-block; padding:2px 8px; border-radius:12px;
+                     background:#1a3a2a; color:#4ade80; font-size:10px; font-weight:600; margin-top:6px; }
+    .guardian-badge { background:#1a2a4a !important; color:#60a5fa !important; }
+
+    /* Ward list */
+    .ward-list { margin:6px 0; }
+    .ward-item { display:flex; align-items:center; justify-content:space-between;
+                 padding:8px 10px; background:#0d1220; border:1px solid #1e2d45;
+                 border-radius:8px; margin-bottom:6px; cursor:pointer; transition:border-color .2s; }
+    .ward-item:hover { border-color:#2563eb; }
+    .ward-name-txt { font-size:12px; color:#e8f0ff; font-weight:600; }
+    .ward-meta { font-size:10px; color:#4a6080; margin-top:2px; }
+    .ward-trend { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:600; }
+    .wt-escalating { background:#4c1d1d; color:#f87171; }
+    .wt-stable { background:#1a2d1a; color:#4ade80; }
+    .wt-improving { background:#1a2641; color:#60a5fa; }
+    .wt-none { background:#1e2d45; color:#4a6080; }
 
     /* Status messages */
-    .msg {
-      padding: 6px 10px; border-radius: 6px; font-size: 11px;
-      margin: 6px 0; display: none;
-    }
-    .msg.success { background: #1a3a2a; color: #4ade80; display: block; }
-    .msg.error   { background: #3a1a1a; color: #f87171; display: block; }
+    .msg { padding:6px 10px; border-radius:6px; font-size:11px; margin:6px 0; display:none; }
+    .msg.success { background:#1a3a2a; color:#4ade80; display:block; }
+    .msg.error   { background:#3a1a1a; color:#f87171; display:block; }
+    .msg.info    { background:#1a2641; color:#93c5fd; display:block; }
 
-    /* ── Disclaimer ── */
-    .disclaimer {
-      padding: 8px 16px 12px; font-size: 10px;
-      color: #2a4a7f; line-height: 1.5; text-align: center;
-    }
-    .disclaimer strong { color: #ef4444; }
+    /* Link code display */
+    .link-code-box { background:#111827; border:2px dashed #2563eb; border-radius:8px;
+                     padding:14px; text-align:center; margin:10px 0; }
+    .link-code-val { font-size:28px; font-weight:700; color:#06b6d4; letter-spacing:6px;
+                     font-family:monospace; }
+    .link-code-hint { font-size:10px; color:#4a6080; margin-top:6px; }
 
-    /* ── API Status ── */
-    .api-status {
-      display: flex; align-items: center; gap: 6px;
-      padding: 7px 16px; font-size: 10px;
-      color: #4a6080; border-top: 1px solid #1e2d45;
-    }
-    .api-dot { width: 6px; height: 6px; border-radius: 50%; background: #4a6080; }
-    .api-dot.online  { background: #10b981; }
-    .api-dot.offline { background: #ef4444; }
+    /* Adult consent warning */
+    .adult-consent-box { background:#1a1a3a; border:1px solid #4f46e5; border-radius:8px;
+                         padding:10px 12px; margin:8px 0; display:none; }
+    .adult-consent-box p { font-size:11px; color:#a78bfa; line-height:1.6; margin-bottom:8px; }
 
-    /* ── Empty state ── */
-    .empty-state {
-      text-align: center; padding: 20px 16px;
-      font-size: 11px; color: #2a4a7f;
-    }
-    .empty-state div { font-size: 24px; margin-bottom: 6px; }
+    .disclaimer { padding:8px 16px 12px; font-size:10px; color:#2a4a7f; line-height:1.5; text-align:center; }
+    .disclaimer strong { color:#ef4444; }
+    .api-status { display:flex; align-items:center; gap:6px; padding:7px 16px;
+                  font-size:10px; color:#4a6080; border-top:1px solid #1e2d45; }
+    .api-dot { width:6px; height:6px; border-radius:50%; background:#4a6080; }
+    .api-dot.online { background:#10b981; } .api-dot.offline { background:#ef4444; }
+    .empty-state { text-align:center; padding:16px; font-size:11px; color:#2a4a7f; }
+    .empty-state div { font-size:24px; margin-bottom:6px; }
+    .section-link { font-size:10px; color:#3b82f6; text-decoration:none; cursor:pointer; display:block; margin-top:8px; }
+    .section-link:hover { text-decoration:underline; }
   </style>
 </head>
 <body>
@@ -271,21 +165,19 @@
     <span class="logo-dot">◆</span>
     <div>
       <div class="header-title">MindGuard</div>
-      <div class="header-sub">Emotional Wellbeing Monitor</div>
+      <div class="header-sub">Adolescent Wellbeing Monitor</div>
     </div>
   </div>
 
   <!-- Tabs -->
   <div class="tabs">
     <button class="tab-btn active" id="tab-monitor">Monitor</button>
-    <button class="tab-btn"        id="tab-history">History</button>
-    <button class="tab-btn"        id="tab-account">Account</button>
+    <button class="tab-btn" id="tab-history">History</button>
+    <button class="tab-btn" id="tab-account">Account</button>
   </div>
 
-  <!-- ── TAB 1: Monitor ── -->
+  <!-- TAB 1: Monitor -->
   <div class="tab-panel active" id="panel-monitor">
-
-    <!-- Toggle -->
     <div class="toggle-row">
       <div>
         <div class="toggle-label">Text Monitoring</div>
@@ -296,8 +188,6 @@
         <span class="slider"></span>
       </label>
     </div>
-
-    <!-- Risk Badge -->
     <div class="risk-section">
       <div class="risk-badge" id="risk-badge">
         <div class="risk-dot" id="risk-dot" style="background:#4a6080;"></div>
@@ -308,151 +198,193 @@
         <div class="risk-time" id="risk-time">—</div>
       </div>
     </div>
-
-    <!-- Trend -->
     <div class="trend-row" id="trend-row" style="display:none;">
       <span>14-day trend:</span>
       <span class="trend-chip" id="trend-chip">stable</span>
       <span id="trend-detail" style="margin-left:auto;"></span>
     </div>
-
-
-    <!-- Disclaimer -->
     <div class="disclaimer">
       For support only — not a clinical diagnostic.<br>
       In crisis? Call or text <strong>988</strong> · Text <strong>HOME</strong> to <strong>741741</strong>
     </div>
-
   </div>
 
-  <!-- ── TAB 2: History ── -->
+  <!-- TAB 2: History -->
   <div class="tab-panel" id="panel-history">
-
     <div class="history-filters">
       <button class="filter-btn active" id="filt-today">Today</button>
-      <button class="filter-btn"        id="filt-7d">7 Days</button>
-      <button class="filter-btn"        id="filt-14d">14 Days</button>
+      <button class="filter-btn" id="filt-7d">7 Days</button>
+      <button class="filter-btn" id="filt-14d">14 Days</button>
     </div>
-
-    <!-- Score dot sparkline -->
     <div class="score-dots" id="score-dots">
-      <div class="empty-state" style="width:100%; padding:10px 0;">
-        <div>📊</div>
-        No history yet — enable monitoring to begin.
+      <div class="empty-state" style="width:100%;padding:10px 0;">
+        <div>📊</div>No history yet — enable monitoring to begin.
       </div>
     </div>
-
-    <!-- Summary row -->
     <div class="history-summary">
       <div>Status: <span style="color:#4ade80">Active</span></div>
-      <div>Entries logged: <span id="hist-count">0</span></div>
+      <div>Entries: <span id="hist-count">0</span></div>
     </div>
-
-    <!-- Reset button -->
-    <button class="reset-btn" id="reset-btn">
-      ↺ Reset Session Scores
-    </button>
-
+    <button class="reset-btn" id="reset-btn">↺ Reset Session Scores</button>
     <div class="disclaimer">
       Scores from up to <strong style="color:#93c5fd;">14 days</strong> are kept locally.
-      Registered users' data is also stored on the MindGuard backend.
     </div>
   </div>
 
-  <!-- ── TAB 3: Account ── -->
+  <!-- TAB 3: Account -->
   <div class="tab-panel" id="panel-account">
 
-    <!-- Profile (shown when logged in) -->
-    <div id="profile-section" class="account-section" style="display:none;">
-      <h3>Your Account</h3>
+    <!-- ── GUARDIAN PROFILE (shown when guardian account active) ── -->
+    <div id="guardian-profile-section" class="account-section" style="display:none;">
+      <h3>Guardian Account</h3>
       <div class="profile-card">
-        <div class="profile-name" id="profile-name">—</div>
-        <div class="profile-id"  id="profile-id">—</div>
-        <div class="profile-badge">✓ Monitoring Active</div>
+        <div class="profile-name" id="gp-name">—</div>
+        <div class="profile-id" id="gp-id">—</div>
+        <div class="profile-badge guardian-badge">🛡 Guardian Active</div>
       </div>
-
-      <!-- Guardian list -->
-      <h3 style="margin-top:12px;">Trusted Contacts</h3>
-      <p style="font-size:10px; color:#4a6080; margin-bottom:8px; line-height:1.5;">
-        These contacts are notified if a high-risk pattern is detected.
-      </p>
-      <div class="guardian-list" id="guardian-list">
-        <div class="empty-state" style="padding:10px 0;">No contacts added yet.</div>
+      <h3 style="margin-top:12px;">Monitored Children</h3>
+      <div class="ward-list" id="ward-list">
+        <div class="empty-state" style="padding:10px 0;">No children linked yet.</div>
       </div>
-
-      <!-- Add guardian form -->
-      <div class="form-group" style="margin-top:8px;">
-        <label>Contact Email</label>
-        <input type="email" id="g-email" placeholder="friend@example.com">
-      </div>
-      <div class="form-group">
-        <label>Name (optional)</label>
-        <input type="text" id="g-name" placeholder="e.g. Mum, John">
-      </div>
-      <div class="form-group">
-        <label>Relationship</label>
-        <select id="g-rel">
-          <option value="guardian">Guardian</option>
-          <option value="parent">Parent</option>
-          <option value="friend">Friend</option>
-          <option value="counselor">Counselor</option>
-          <option value="partner">Partner</option>
-          <option value="sibling">Sibling</option>
-        </select>
-      </div>
-      <div id="guardian-msg" class="msg"></div>
-      <button class="submit-btn" id="add-guardian-btn">
-        + Add Trusted Contact
+      <button class="submit-btn" id="add-ward-btn" style="margin-top:8px; background:linear-gradient(135deg,#059669,#10b981);">
+        + Link Another Child
       </button>
+      <a class="section-link" id="open-dashboard-link" href="http://localhost:8000/dashboard" target="_blank">
+        🖥 Open Guardian Dashboard ↗
+      </a>
     </div>
 
-    <!-- Sign-up (shown when not logged in) -->
-    <div id="signup-section" class="account-section">
-      <h3>Set Up Monitoring</h3>
-      <p style="font-size:10px; color:#4a6080; margin-bottom:10px; line-height:1.6;">
-        Install this on your ward's or friend's device to monitor their emotional wellbeing and receive alerts.
+    <!-- ── WARD PROFILE (shown when ward/linked device) ── -->
+    <div id="ward-profile-section" class="account-section" style="display:none;">
+      <h3>This Device</h3>
+      <div class="profile-card">
+        <div class="profile-name" id="wp-name">—</div>
+        <div class="profile-id" id="wp-id">—</div>
+        <div class="profile-badge">✓ Monitoring Active</div>
+      </div>
+      <p style="font-size:10px;color:#4a6080;line-height:1.6;margin-top:8px;">
+        This device is being monitored for wellbeing support. Your parent or guardian will be notified only if a crisis-level pattern is detected.
       </p>
+    </div>
 
+    <!-- ── SETUP WIZARD (shown when not logged in) ── -->
+    <div id="setup-section" class="account-section">
+      <h3>Set Up MindGuard</h3>
+
+      <!-- Step Indicator -->
+      <div style="margin-bottom:14px;">
+        <div class="step-indicator">
+          <div class="step-dot active" id="s-dot-1">1</div>
+          <div class="step-line" id="s-line-1"></div>
+          <div class="step-dot" id="s-dot-2">2</div>
+          <div class="step-line" id="s-line-2"></div>
+          <div class="step-dot" id="s-dot-3">3</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;">
+          <span class="step-label">Guardian</span>
+          <span class="step-label">Child Info</span>
+          <span class="step-label">Link Device</span>
+        </div>
+      </div>
+
+      <!-- Step 1: Guardian Registration -->
+      <div class="step-panel active" id="step-1">
+        <p style="font-size:10px;color:#4a6080;margin-bottom:10px;line-height:1.6;">
+          As a parent or guardian, create your account first. You will receive alerts and can monitor from the guardian dashboard.
+        </p>
+        <div class="form-group">
+          <label>Your Full Name</label>
+          <input type="text" id="g-name" placeholder="e.g. Mrs Adaeze Obi" maxlength="80">
+        </div>
+        <div class="form-group">
+          <label>Your Email (for alerts)</label>
+          <input type="email" id="g-email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label>Country (for localized crisis lines)</label>
+          <select id="g-country">
+            <option value="NG">Nigeria (NG)</option>
+            <option value="US">United States (US)</option>
+            <option value="GB">United Kingdom (GB)</option>
+            <option value="GLOBAL" selected>Global / Other</option>
+          </select>
+        </div>
+        <div class="consent-check">
+          <input type="checkbox" id="g-consent">
+          <span>I am the parent/guardian of the adolescent and take responsibility for this monitoring.</span>
+        </div>
+        <div id="step1-msg" class="msg"></div>
+        <button class="submit-btn" id="step1-btn">Create Guardian Account →</button>
+      </div>
+
+      <!-- Step 2: Ward (Child) Registration -->
+      <div class="step-panel" id="step-2">
+        <p style="font-size:10px;color:#4a6080;margin-bottom:10px;line-height:1.6;">
+          Enter details for the child you want to monitor. The system will validate their age (10–24).
+        </p>
+        <div class="form-group">
+          <label>Child's First Name</label>
+          <input type="text" id="w-name" placeholder="e.g. Emeka" maxlength="60">
+        </div>
+        <div class="form-group">
+          <label>Child's Date of Birth</label>
+          <input type="date" id="w-dob" max="">
+        </div>
+        <div class="form-group">
+          <label>Your Relationship to Child</label>
+          <select id="w-rel">
+            <option value="parent">Parent</option>
+            <option value="guardian">Guardian</option>
+            <option value="counselor">School Counselor</option>
+            <option value="sibling">Sibling</option>
+          </select>
+        </div>
+        <!-- Adult consent (18–24) — shown conditionally -->
+        <div class="adult-consent-box" id="adult-consent-box">
+          <p>
+            <strong style="color:#a78bfa;">🔔 Young Adult Notice (18–24)</strong><br>
+            Since the person is 18 or older, they must be aware of and agree to this monitoring. This is required before you can proceed.
+          </p>
+          <div class="consent-check">
+            <input type="checkbox" id="adult-consent-chk">
+            <span>I confirm that the young adult is aware of and consents to being monitored.</span>
+          </div>
+        </div>
+        <div class="consent-check">
+          <input type="checkbox" id="w-consent">
+          <span>I give consent to monitor this child's browser activity for mental health support purposes.</span>
+        </div>
+        <div id="step2-msg" class="msg"></div>
+        <button class="submit-btn" id="step2-btn">Register Child →</button>
+        <button class="submit-btn" id="step2-back-btn" style="margin-top:6px;background:#1e2d45;border:1px solid #2563eb;color:#93c5fd;">← Back</button>
+      </div>
+
+      <!-- Step 3: Link Code Display -->
+      <div class="step-panel" id="step-3">
+        <p style="font-size:10px;color:#4a6080;margin-bottom:10px;line-height:1.6;">
+          Child registered! Use the Link Code below to connect the extension on their device.
+        </p>
+        <div class="link-code-box">
+          <div class="link-code-val" id="link-code-display">——</div>
+          <div class="link-code-hint">Enter this code on the child's device under Account → Link Device</div>
+        </div>
+        <button class="submit-btn" id="step3-done-btn" style="margin-top:10px;">✓ Done — Go to Dashboard</button>
+        <button class="submit-btn" id="step3-add-another-btn" style="margin-top:6px;background:#059669;">+ Link Another Child</button>
+      </div>
+    </div>
+
+    <!-- ── LINK DEVICE (ward's browser) ── -->
+    <div id="link-section" class="account-section" style="border-top:1px solid #1e2d45;">
+      <h3>Link This Device</h3>
+      <p style="font-size:10px;color:#4a6080;margin-bottom:10px;line-height:1.6;">
+        If your parent or guardian has already set up monitoring, enter the Link Code they gave you.
+      </p>
       <div class="form-group">
-        <label>Monitored Person's Name</label>
-        <input type="text" id="reg-ward-name" placeholder="e.g. John" maxlength="60">
+        <label>Link Code (6 characters)</label>
+        <input type="text" id="link-code" placeholder="e.g. AB12CD" maxlength="6" style="text-transform:uppercase;letter-spacing:4px;font-size:16px;text-align:center;">
       </div>
-      <div class="form-group">
-        <label>Your Email (for alerts)</label>
-        <input type="email" id="reg-guardian-email" placeholder="you@example.com">
-      </div>
-      <div class="form-group">
-        <label>Your Name</label>
-        <input type="text" id="reg-guardian-name" placeholder="Your name" maxlength="60">
-      </div>
-      <div class="form-group">
-        <label>Your Relationship</label>
-        <select id="reg-relationship">
-          <option value="parent">Parent</option>
-          <option value="guardian">Guardian</option>
-          <option value="friend">Friend</option>
-          <option value="counselor">Counselor</option>
-          <option value="partner">Partner</option>
-          <option value="sibling">Sibling</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Country (for localized hotlines)</label>
-        <select id="reg-country">
-          <option value="NG">Nigeria (NG)</option>
-          <option value="US">United States (US)</option>
-          <option value="GB">United Kingdom (GB)</option>
-          <option value="GLOBAL" selected>Global / Other</option>
-        </select>
-      </div>
-      <div class="consent-check">
-        <input type="checkbox" id="reg-consent">
-        <span>I have informed the monitored person and obtained their consent to monitor this browser for mental health support purposes.</span>
-      </div>
-      <div id="signup-msg" class="msg"></div>
-      <button class="submit-btn" id="signup-btn">
-        Set Up Monitoring &amp; Alerts
-      </button>
+      <div id="link-msg" class="msg"></div>
+      <button class="submit-btn link-btn-purple" id="link-btn">Link This Device</button>
     </div>
 
   </div>
@@ -460,7 +392,7 @@
   <!-- API Status -->
   <div class="api-status">
     <div class="api-dot" id="api-dot"></div>
-    <span id="api-status-text">Checking backend...</span>
+    <span id="api-status-text">Checking backend…</span>
   </div>
 
   <script src="popup.js"></script>

@@ -1,8 +1,8 @@
 # monitor_storage.py
 # ─────────────────────────────────────────────────────────────
 # SQLite Storage Layer — Text Monitor + Risk Analysis History
-# Works alongside main.py, desktop_app.py, risk_engine.py,
-# mindguard_bot.py, crisis_engine.py
+# Adolescent-First Design (age 10–24)
+# Guardian signs up → links ward device → system monitors passively
 # ─────────────────────────────────────────────────────────────
 #
 # DATABASE SCHEMA:
@@ -19,13 +19,25 @@
 #   Table: user_sessions  (persistent consent store)
 #     user_id           TEXT     — unique user identifier (PK)
 #     username          TEXT
-#     email             TEXT     — registered email address (NEW)
-#     display_name      TEXT     — friendly display name (NEW)
+#     email             TEXT     — registered email address
+#     display_name      TEXT     — friendly display name
 #     consented_at      TEXT     — ISO-8601 datetime
 #     monitoring_active INTEGER  — 1 = active, 0 = paused
 #     country_code      TEXT     — ISO-3166-1 alpha-2 (default "GLOBAL")
+#     role              TEXT     — "ward" (default) | "guardian_account"
+#     date_of_birth     TEXT     — ISO date "YYYY-MM-DD" for ward age validation
+#     guardian_user_id  TEXT     — FK → user_sessions.user_id (owning guardian)
 #
-#   Table: guardians  (people registered to watch for a monitored user)
+#   Table: guardian_ward_links  (M:N guardian ↔ ward associations)
+#     id              INTEGER  — auto-increment primary key
+#     guardian_id     TEXT     — FK → user_sessions.user_id (role='guardian_account')
+#     ward_id         TEXT     — FK → user_sessions.user_id (role='ward')
+#     ward_name       TEXT     — adolescent's friendly name
+#     ward_dob        TEXT     — adolescent's date of birth (ISO date)
+#     relationship    TEXT     — "parent" | "guardian" | "counselor" | "sibling"
+#     linked_at       TEXT     — ISO-8601 datetime
+#
+#   Table: guardians  (legacy contact list — kept for backward compat)
 #     id                INTEGER  — auto-increment primary key
 #     user_id           TEXT     — FK → user_sessions.user_id
 #     guardian_email    TEXT     — contact email
@@ -118,14 +130,33 @@ class MonitorStorage:
                     display_name      TEXT,
                     consented_at      TEXT    NOT NULL,
                     monitoring_active INTEGER NOT NULL DEFAULT 1,
-                    country_code      TEXT    NOT NULL DEFAULT 'GLOBAL'
+                    country_code      TEXT    NOT NULL DEFAULT 'GLOBAL',
+                    role              TEXT    NOT NULL DEFAULT 'ward',
+                    date_of_birth     TEXT,
+                    guardian_user_id  TEXT
                 );
 
                 -- Allow upgrading existing DBs without losing data
-                -- (SQLite ignores ADD COLUMN if it already exists via IF NOT EXISTS workaround)
                 CREATE TABLE IF NOT EXISTS _schema_migrations (
                     version INTEGER PRIMARY KEY
                 );
+
+                -- ── Guardian ↔ Ward links (M:N, adolescent-first) ────────
+                CREATE TABLE IF NOT EXISTS guardian_ward_links (
+                    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                    guardian_id  TEXT    NOT NULL,
+                    ward_id      TEXT    NOT NULL,
+                    ward_name    TEXT,
+                    ward_dob     TEXT,
+                    relationship TEXT    NOT NULL DEFAULT 'parent',
+                    linked_at    TEXT    NOT NULL,
+                    UNIQUE(guardian_id, ward_id)
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_gwl_guardian
+                    ON guardian_ward_links (guardian_id);
+                CREATE INDEX IF NOT EXISTS idx_gwl_ward
+                    ON guardian_ward_links (ward_id);
 
                 -- ── Guardians (registered watchers) ───────────────────
                 CREATE TABLE IF NOT EXISTS guardians (
@@ -307,11 +338,16 @@ class MonitorStorage:
     def migrate(self) -> None:
         """
         Apply non-destructive ALTER TABLE migrations for existing databases
-        that pre-date the guardians / crisis_events schema additions.
+        that pre-date any schema additions.
         """
         migrations = [
+            # v1 — email + display_name
             "ALTER TABLE user_sessions ADD COLUMN email TEXT",
             "ALTER TABLE user_sessions ADD COLUMN display_name TEXT",
+            # v2 — adolescent-first: role, DOB, guardian link
+            "ALTER TABLE user_sessions ADD COLUMN role TEXT NOT NULL DEFAULT 'ward'",
+            "ALTER TABLE user_sessions ADD COLUMN date_of_birth TEXT",
+            "ALTER TABLE user_sessions ADD COLUMN guardian_user_id TEXT",
         ]
         with self._lock:
             for sql in migrations:
@@ -326,23 +362,106 @@ class MonitorStorage:
     def save_consent(self, user_id: str, username: str,
                      country_code: str = "GLOBAL",
                      email: str = "",
-                     display_name: str = "") -> None:
+                     display_name: str = "",
+                     role: str = "ward",
+                     date_of_birth: str = "",
+                     guardian_user_id: str = "") -> None:
         """Record or refresh consent for a user."""
         ts = datetime.now().isoformat(timespec="seconds")
         with self._lock:
             self._conn.execute(
                 """INSERT INTO user_sessions
                    (user_id, username, email, display_name,
-                    consented_at, monitoring_active, country_code)
-                   VALUES (?, ?, ?, ?, ?, 1, ?)
+                    consented_at, monitoring_active, country_code,
+                    role, date_of_birth, guardian_user_id)
+                   VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
                    ON CONFLICT(user_id) DO UPDATE SET
                        username          = excluded.username,
                        email             = excluded.email,
                        display_name      = excluded.display_name,
                        consented_at      = excluded.consented_at,
                        monitoring_active = 1,
-                       country_code      = excluded.country_code""",
-                (str(user_id), username, email, display_name, ts, country_code)
+                       country_code      = excluded.country_code,
+                       role              = excluded.role,
+                       date_of_birth     = excluded.date_of_birth,
+                       guardian_user_id  = excluded.guardian_user_id""",
+                (str(user_id), username, email, display_name, ts, country_code,
+                 role, date_of_birth, guardian_user_id)
+            )
+            self._conn.commit()
+
+    # ── Guardian Account Helpers (Adolescent-First) ────────────
+
+    def save_guardian_account(
+        self,
+        guardian_id  : str,
+        name         : str,
+        email        : str,
+        country_code : str = "GLOBAL",
+    ) -> None:
+        """Create or refresh a guardian-role account (Step 1 of setup)."""
+        self.save_consent(
+            user_id      = guardian_id,
+            username     = name,
+            email        = email,
+            display_name = name,
+            country_code = country_code,
+            role         = "guardian_account",
+        )
+
+    def link_ward_to_guardian(
+        self,
+        guardian_id  : str,
+        ward_id      : str,
+        ward_name    : str,
+        ward_dob     : str,
+        relationship : str = "parent",
+    ) -> None:
+        """Create a guardian ↔ ward pairing in guardian_ward_links."""
+        ts = datetime.now().isoformat(timespec="seconds")
+        with self._lock:
+            self._conn.execute(
+                """INSERT OR REPLACE INTO guardian_ward_links
+                   (guardian_id, ward_id, ward_name, ward_dob, relationship, linked_at)
+                   VALUES (?, ?, ?, ?, ?, ?)""",
+                (str(guardian_id), str(ward_id), ward_name, ward_dob, relationship, ts)
+            )
+            self._conn.commit()
+
+    def get_linked_wards(self, guardian_id: str) -> list[dict]:
+        """Return all wards linked to a guardian account."""
+        cur = self._conn.execute(
+            """SELECT gwl.ward_id, gwl.ward_name, gwl.ward_dob,
+                      gwl.relationship, gwl.linked_at,
+                      us.monitoring_active
+               FROM guardian_ward_links gwl
+               LEFT JOIN user_sessions us ON us.user_id = gwl.ward_id
+               WHERE gwl.guardian_id = ?
+               ORDER BY gwl.linked_at ASC""",
+            (str(guardian_id),)
+        )
+        return [dict(row) for row in cur.fetchall()]
+
+    def get_ward_guardian(self, ward_id: str) -> Optional[dict]:
+        """Return the guardian account record linked to a ward, or None."""
+        cur = self._conn.execute(
+            """SELECT us.user_id, us.email, us.display_name,
+                      us.country_code, gwl.relationship, gwl.ward_name
+               FROM guardian_ward_links gwl
+               JOIN user_sessions us ON us.user_id = gwl.guardian_id
+               WHERE gwl.ward_id = ?
+               LIMIT 1""",
+            (str(ward_id),)
+        )
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+    def unlink_ward(self, guardian_id: str, ward_id: str) -> None:
+        """Remove a guardian ↔ ward link."""
+        with self._lock:
+            self._conn.execute(
+                "DELETE FROM guardian_ward_links WHERE guardian_id = ? AND ward_id = ?",
+                (str(guardian_id), str(ward_id))
             )
             self._conn.commit()
 

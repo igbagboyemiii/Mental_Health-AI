@@ -14,11 +14,14 @@ import uvicorn
 import faiss
 
 from fastapi import FastAPI, HTTPException, status, Query, WebSocket, WebSocketDisconnect, Depends, Security
+from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security.api_key import APIKeyHeader
 from contextlib import asynccontextmanager
 from pydantic import BaseModel, Field
 from typing import Optional
+from datetime import date as DateType
 from sentence_transformers import SentenceTransformer
 from scoring.indicators import compute_scores, INDICATORS
 from risk.classifier import classify, RISK_TIERS
@@ -869,7 +872,10 @@ async def register_user(req: RegisterRequest):
     if db_store is None:
         raise HTTPException(status_code=503, detail="Storage not initialized")
 
-    user_id = f"ext:{uuid.uuid4().hex[:12]}"
+    import random
+    import string
+    # Generate a 6-character alphanumeric code for easy device linking
+    user_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     db_store.save_consent(
         user_id      = user_id,
         username     = req.username,
@@ -961,6 +967,271 @@ async def list_guardians(user_id: str):
         raise HTTPException(status_code=503, detail="Storage not initialized")
     guardians = db_store.get_guardians(user_id)
     return {"user_id": user_id, "guardians": guardians, "total": len(guardians)}
+
+
+# ─────────────────────────────────────────────────────────────
+# ADOLESCENT-FIRST ENDPOINTS (Age 10–24 Guardian-Ward Flow)
+# ─────────────────────────────────────────────────────────────
+
+class GuardianRegistrationRequest(BaseModel):
+    """
+    Step 1 — Parent/guardian creates their own account.
+    Returns guardian_id which is used in Step 2.
+    """
+    guardian_name : str  = Field(..., min_length=2, max_length=80)
+    guardian_email: str  = Field(..., min_length=5, max_length=120)
+    country_code  : str  = Field(default="GLOBAL", max_length=6)
+    consent       : bool = Field(..., description="Guardian confirms responsibility for the monitored device")
+
+    model_config = {"json_schema_extra": {"example": {
+        "guardian_name" : "Mrs Adaeze Obi",
+        "guardian_email": "adaeze@example.com",
+        "country_code"  : "NG",
+        "consent"       : True,
+    }}}
+
+
+class WardRegistrationRequest(BaseModel):
+    """
+    Step 2 — Guardian links a child (ward) account.
+    ward_dob is used to verify age 10–24.
+    For wards aged 18–24, adult_aware_consent must also be True.
+    """
+    guardian_id       : str  = Field(..., description="guardian_id from Step 1")
+    ward_name         : str  = Field(..., min_length=1, max_length=60)
+    ward_dob          : str  = Field(..., description="ISO date YYYY-MM-DD (used for age validation)")
+    relationship      : str  = Field(default="parent",
+                                     description="parent | guardian | counselor | sibling")
+    guardian_consent  : bool = Field(..., description="Guardian gives consent on behalf of the ward")
+    adult_aware_consent: bool = Field(
+        default=False,
+        description="For wards 18–24: confirms the young adult is aware of and agrees to monitoring"
+    )
+
+    model_config = {"json_schema_extra": {"example": {
+        "guardian_id"        : "AB12CD",
+        "ward_name"          : "Emeka",
+        "ward_dob"           : "2010-06-15",
+        "relationship"       : "parent",
+        "guardian_consent"   : True,
+        "adult_aware_consent": False,
+    }}}
+
+
+def _compute_age(dob_str: str) -> int:
+    """Parse YYYY-MM-DD and return age in whole years."""
+    try:
+        dob   = DateType.fromisoformat(dob_str)
+        today = DateType.today()
+        return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date_of_birth. Use YYYY-MM-DD format.")
+
+
+@app.post("/auth/guardian/register", tags=["Adolescent Auth"])
+async def register_guardian(req: GuardianRegistrationRequest):
+    """
+    Step 1 — Parent/guardian creates a MindGuard guardian account.
+    Returns guardian_id to use in Step 2 (ward registration).
+    """
+    if not req.consent:
+        raise HTTPException(
+            status_code=400,
+            detail="Consent is required. The guardian must agree to take responsibility for monitoring."
+        )
+    if db_store is None:
+        raise HTTPException(status_code=503, detail="Storage not initialized")
+
+    import random, string
+    guardian_id = "G-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+    db_store.save_guardian_account(
+        guardian_id  = guardian_id,
+        name         = req.guardian_name,
+        email        = req.guardian_email,
+        country_code = req.country_code,
+    )
+    db_store.log_audit(
+        user_id    = guardian_id,
+        endpoint   = "/auth/guardian/register",
+        risk_level = "none",
+        score      = 0.0,
+        source     = "browser_extension",
+    )
+    return {
+        "guardian_id"   : guardian_id,
+        "guardian_name" : req.guardian_name,
+        "guardian_email": req.guardian_email,
+        "message"       : "Guardian account created. Proceed to Step 2 to link your child's account.",
+    }
+
+
+@app.post("/auth/ward/register", tags=["Adolescent Auth"])
+async def register_ward(req: WardRegistrationRequest):
+    """
+    Step 2 — Guardian links a ward (child aged 10–24).
+    Validates age, enforces two-step consent for 18–24-year-olds,
+    and returns the ward_id to store in the extension on the child's device.
+    """
+    if db_store is None:
+        raise HTTPException(status_code=503, detail="Storage not initialized")
+
+    # Validate guardian exists
+    guardian = db_store.get_user(req.guardian_id)
+    if not guardian or guardian.get("role") != "guardian_account":
+        raise HTTPException(
+            status_code=404,
+            detail="Guardian account not found. Complete Step 1 first (/auth/guardian/register)."
+        )
+
+    # Validate ward age 10–24
+    age = _compute_age(req.ward_dob)
+    if age < 10 or age > 24:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Ward age must be between 10 and 24. Computed age: {age} years."
+        )
+
+    # For 18–24: require the adult_aware_consent flag
+    if age >= 18 and not req.adult_aware_consent:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "The ward is 18 or older. adult_aware_consent must be True, confirming that "
+                "the young adult is informed about and agrees to monitoring."
+            )
+        )
+
+    if not req.guardian_consent:
+        raise HTTPException(status_code=400, detail="Guardian consent is required to register a ward.")
+
+    import random, string
+    ward_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+    # Get guardian's country for localized crisis resources
+    country = guardian.get("country_code", "GLOBAL")
+
+    # Create the ward user session
+    db_store.save_consent(
+        user_id          = ward_id,
+        username         = req.ward_name,
+        display_name     = req.ward_name,
+        country_code     = country,
+        role             = "ward",
+        date_of_birth    = req.ward_dob,
+        guardian_user_id = req.guardian_id,
+    )
+
+    # Create the guardian ↔ ward link
+    db_store.link_ward_to_guardian(
+        guardian_id  = req.guardian_id,
+        ward_id      = ward_id,
+        ward_name    = req.ward_name,
+        ward_dob     = req.ward_dob,
+        relationship = req.relationship,
+    )
+
+    # Also add legacy guardian contact so crisis_engine still works
+    guardian_email = guardian.get("email", "")
+    if guardian_email:
+        db_store.add_guardian(
+            user_id        = ward_id,
+            guardian_email = guardian_email,
+            guardian_name  = guardian.get("display_name", ""),
+            relationship   = req.relationship,
+        )
+
+    db_store.log_audit(
+        user_id    = ward_id,
+        endpoint   = "/auth/ward/register",
+        risk_level = "none",
+        score      = 0.0,
+        source     = "browser_extension",
+    )
+    return {
+        "ward_id"          : ward_id,
+        "ward_name"        : req.ward_name,
+        "ward_age"         : age,
+        "guardian_id"      : req.guardian_id,
+        "link_code"        : ward_id,
+        "message"          : (
+            f"{req.ward_name}'s monitoring account is active. "
+            f"Install the extension on their device and enter Link Code: {ward_id}"
+        ),
+    }
+
+
+@app.get("/auth/guardian/{guardian_id}/wards", tags=["Adolescent Auth"])
+async def list_guardian_wards(guardian_id: str):
+    """Return all wards linked to a guardian account."""
+    if db_store is None:
+        raise HTTPException(status_code=503, detail="Storage not initialized")
+    wards = db_store.get_linked_wards(guardian_id)
+    return {"guardian_id": guardian_id, "wards": wards, "total": len(wards)}
+
+
+@app.delete("/auth/ward/unlink", tags=["Adolescent Auth"])
+async def unlink_ward(
+    guardian_id : str = Query(...),
+    ward_id     : str = Query(...),
+):
+    """Remove a guardian ↔ ward monitoring link."""
+    if db_store is None:
+        raise HTTPException(status_code=503, detail="Storage not initialized")
+    db_store.unlink_ward(guardian_id, ward_id)
+    return {"message": f"Ward {ward_id!r} unlinked from guardian {guardian_id!r}."}
+
+
+@app.get("/guardian/dashboard/{guardian_id}", tags=["Adolescent Auth"])
+async def guardian_dashboard_data(guardian_id: str):
+    """
+    Returns aggregated monitoring data for all wards linked to a guardian.
+    Used by the standalone guardian web dashboard.
+    """
+    if db_store is None:
+        raise HTTPException(status_code=503, detail="Storage not initialized")
+
+    guardian = db_store.get_user(guardian_id)
+    if not guardian:
+        raise HTTPException(status_code=404, detail="Guardian account not found.")
+
+    wards = db_store.get_linked_wards(guardian_id)
+    ward_data = []
+    for w in wards:
+        wid    = w["ward_id"]
+        temporal  = db_store.get_temporal_summary(wid, days=14)
+        crises    = db_store.get_crisis_events(wid, limit=5)
+        escalating = db_store.detect_escalation(wid)
+        ward_data.append({
+            "ward_id"         : wid,
+            "ward_name"       : w["ward_name"],
+            "ward_dob"        : w["ward_dob"],
+            "relationship"    : w["relationship"],
+            "linked_at"       : w["linked_at"],
+            "monitoring_active": w.get("monitoring_active", 1),
+            "temporal_summary": temporal,
+            "recent_crises"   : crises,
+            "escalating"      : escalating,
+        })
+
+    return {
+        "guardian_id"   : guardian_id,
+        "guardian_name" : guardian.get("display_name", ""),
+        "guardian_email": guardian.get("email", ""),
+        "total_wards"   : len(wards),
+        "wards"         : ward_data,
+    }
+
+
+@app.get("/dashboard", response_class=HTMLResponse, tags=["Guardian Dashboard"])
+async def serve_guardian_dashboard():
+    """Serve the standalone guardian web dashboard HTML page."""
+    import os
+    dashboard_path = os.path.join(os.path.dirname(__file__), "guardian_dashboard.html")
+    if not os.path.exists(dashboard_path):
+        raise HTTPException(status_code=404, detail="Dashboard file not found.")
+    with open(dashboard_path, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
 
 
 # ─────────────────────────────────────────────────────────────
