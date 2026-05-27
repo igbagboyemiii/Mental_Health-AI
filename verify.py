@@ -1,6 +1,14 @@
 # verify.py  --  MindGuard System Verification Script
 # Run AFTER starting main.py:   python verify.py
-import sys, argparse, requests
+import sys
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except AttributeError:
+        pass
+
+import argparse, requests
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--url", default="http://localhost:8000")

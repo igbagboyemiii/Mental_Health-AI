@@ -1,6 +1,10 @@
-# =============================================================================
-# COMPLETE API — Single Cell, No External Imports
-# =============================================================================
+import sys
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except AttributeError:
+        pass
 
 import os
 import re

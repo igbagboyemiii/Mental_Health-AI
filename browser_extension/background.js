@@ -56,8 +56,15 @@ async function resetSession() {
 
 // ── Call the FastAPI /analyze endpoint ───────────────────────
 async function analyseText(text, sessionId, tabId) {
+  // Guard: ensure we always have a real sessionId, never send as anonymous
+  const effectiveId = sessionId || ("browser_" + Math.random().toString(36).slice(2, 11));
+  if (!sessionId) {
+    console.warn("[MindGuard] No sessionId — generated a temporary one:", effectiveId);
+    chrome.storage.local.set({ sessionId: effectiveId });
+  }
+
   try {
-    const resp = await fetch(`${API_BASE}/analyze?user_id=${sessionId}`, {
+    const resp = await fetch(`${API_BASE}/analyze?user_id=${effectiveId}`, {
       method  : "POST",
       headers : {
         "Content-Type": "application/json",
@@ -75,11 +82,13 @@ async function analyseText(text, sessionId, tabId) {
     const level = (data.risk_level || "low").toLowerCase();
     const score = data.composite_score || 0;
 
-    // ── Update badge ──────────────────────────────────────────
-    if (tabId) updateBadge(tabId, level);
+    console.log(`[MindGuard] Analysed — level: ${level}, score: ${score}, user: ${effectiveId}`);
+
+    // ── Update badge (global + per-tab) ───────────────────────
+    updateBadge(tabId, level);
 
     // ── Update score history (500-entry rolling window) ───────
-    await updateHistory(score, level, text, sessionId);
+    await updateHistory(score, level, text, effectiveId);
 
     // ── Persist latest result for popup ───────────────────────
     chrome.storage.local.set({ latestResult: data, lastUpdated: Date.now() });
@@ -186,14 +195,23 @@ async function sendContextWindow(sessionId, texts, stats) {
 }
 
 // ── Update extension icon badge ───────────────────────────────
+// Sets badge globally (no tabId) so it persists when switching tabs.
+// Also sets it per-tab as a fallback for multi-window setups.
 function updateBadge(tabId, level) {
   const color = BADGE_COLORS[level] || BADGE_COLORS.low;
   const text  = level === "crisis" ? "!" :
                 level === "high"   ? "H" :
                 level === "medium" ? "M" : "";
 
-  chrome.action.setBadgeText({ text, tabId });
-  chrome.action.setBadgeBackgroundColor({ color, tabId });
+  // ── Global badge (survives tab switches) ─────────────────────
+  chrome.action.setBadgeText({ text });
+  chrome.action.setBadgeBackgroundColor({ color });
+
+  // ── Per-tab badge (overrides global for that specific tab) ───
+  if (tabId) {
+    chrome.action.setBadgeText({ text, tabId });
+    chrome.action.setBadgeBackgroundColor({ color, tabId });
+  }
 }
 
 // ── Crisis / escalation notifications ────────────────────────

@@ -15,6 +15,14 @@
 #   pip install pynput pyperclip pygetwindow
 # ─────────────────────────────────────────────────────────────
 
+import sys
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except AttributeError:
+        pass
+
 import time
 import threading
 from datetime import datetime

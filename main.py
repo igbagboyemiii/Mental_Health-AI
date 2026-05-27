@@ -1,7 +1,10 @@
-# main.py
-# ─────────────────────────────────────────────────────────────
-# FastAPI Emotional Risk Analysis API
-# ─────────────────────────────────────────────────────────────
+import sys
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except AttributeError:
+        pass
 
 import os
 import re
@@ -875,7 +878,7 @@ async def register_user(req: RegisterRequest):
     import random
     import string
     # Generate a 6-character alphanumeric code for easy device linking
-    user_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    user_id = 'ext:' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     db_store.save_consent(
         user_id      = user_id,
         username     = req.username,

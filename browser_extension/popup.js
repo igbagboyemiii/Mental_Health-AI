@@ -384,3 +384,27 @@ document.getElementById('filt-today').addEventListener('click', () => filterHist
 document.getElementById('filt-7d').addEventListener('click',    () => filterHistory('7d'));
 document.getElementById('filt-14d').addEventListener('click',   () => filterHistory('14d'));
 document.getElementById('reset-btn').addEventListener('click',  resetSession);
+
+// ── Live update: refresh popup when background.js saves new results ─
+// Without this listener the popup only shows data from when it was opened.
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'local') return;
+
+  // New risk result written by background.js after an analysis
+  if (changes.latestResult || changes.lastUpdated) {
+    chrome.storage.local.get(['latestResult', 'lastUpdated'], (r) => {
+      if (r.latestResult) updateRiskDisplay(r.latestResult, r.lastUpdated);
+    });
+  }
+
+  // History updated
+  if (changes.scoreHistory) {
+    allHistory = changes.scoreHistory.newValue || [];
+    renderHistoryDots(allHistory, currentFilter);
+  }
+
+  // Context/trend updated
+  if (changes.contextResult) {
+    renderTrend(changes.contextResult.newValue);
+  }
+});

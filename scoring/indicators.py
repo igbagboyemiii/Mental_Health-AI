@@ -5,6 +5,13 @@ Module 1: Input Indicators & Normalization
 Target Constructs: Anxiety Severity + Burnout Likelihood
 Method A: Literature-Based Weights (PHQ-9, GAD-7, MBI, PSS)
 """
+import sys
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except AttributeError:
+        pass
 
 from dataclasses import dataclass, field
 from typing import Optional
@@ -136,32 +143,31 @@ def normalize(indicator: Indicator, raw_value: float) -> float:
     v = max(indicator.scale_min, min(indicator.scale_max, raw_value))
     span = indicator.scale_max - indicator.scale_min
 
-    match indicator.norm_type:
+    nt = indicator.norm_type
+    if nt == "linear":
+        # Higher value = higher risk (e.g. stress)
+        return (v - indicator.scale_min) / span
 
-        case "linear":
-            # Higher value = higher risk (e.g. stress)
-            return (v - indicator.scale_min) / span
+    elif nt == "inverse":
+        # Lower value = higher risk (e.g. mood, social, concentration)
+        return (indicator.scale_max - v) / span
 
-        case "inverse":
-            # Lower value = higher risk (e.g. mood, social, concentration)
-            return (indicator.scale_max - v) / span
+    elif nt == "ushaped":
+        # Deviation from optimal = risk (e.g. sleep)
+        # Both too little AND too much carry risk
+        opt = indicator.optimal or (span / 2 + indicator.scale_min)
+        max_dev = max(opt - indicator.scale_min, indicator.scale_max - opt)
+        return min(1.0, abs(v - opt) / max_dev)
 
-        case "ushaped":
-            # Deviation from optimal = risk (e.g. sleep)
-            # Both too little AND too much carry risk
-            opt = indicator.optimal or (span / 2 + indicator.scale_min)
-            max_dev = max(opt - indicator.scale_min, indicator.scale_max - opt)
-            return min(1.0, abs(v - opt) / max_dev)
+    elif nt == "threshold":
+        # Low use = 0 risk, crosses threshold sharply (e.g. substance)
+        threshold = indicator.scale_min + span * 0.3   # 30% of scale
+        if v <= threshold:
+            return 0.0
+        return min(1.0, (v - threshold) / (span * 0.7))
 
-        case "threshold":
-            # Low use = 0 risk, crosses threshold sharply (e.g. substance)
-            threshold = indicator.scale_min + span * 0.3   # 30% of scale
-            if v <= threshold:
-                return 0.0
-            return min(1.0, (v - threshold) / (span * 0.7))
-
-        case _:
-            raise ValueError(f"Unknown norm_type: {indicator.norm_type}")
+    else:
+        raise ValueError(f"Unknown norm_type: {indicator.norm_type}")
 
 
 # ─────────────────────────────────────────────

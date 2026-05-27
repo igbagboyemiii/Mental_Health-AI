@@ -1,5 +1,12 @@
-# verify_phase2.py
-import requests, sys, uuid
+import sys
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except AttributeError:
+        pass
+
+import requests, uuid
 
 BASE = "http://localhost:8000"
 
