@@ -32,7 +32,10 @@ from crisis_engine import crisis_engine
 import requests
 import time
 
-nest_asyncio.apply()
+try:
+    nest_asyncio.apply()
+except ValueError:
+    pass  # uvloop (used on Render Linux) cannot be patched by nest_asyncio, but nesting is not required there.
 
 # ─────────────────────────────────────────────────────────────
 # Configuration
