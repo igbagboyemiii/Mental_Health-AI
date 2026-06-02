@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — MindGuard Mental Health Monitor</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:   #0f1f3d;
+      --blue:   #1a56a0;
+      --sky:    #3b82c4;
+      --teal:   #0d9488;
+      --light:  #eef4fb;
+      --mist:   #f7fafd;
+      --ink:    #1e2d45;
+      --body:   #3d4f63;
+      --soft:   #6b7f96;
+      --rule:   #d1dde9;
+      --white:  #ffffff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--mist);
+      color: var(--body);
+      line-height: 1.75;
+      font-size: 16px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--navy);
+      padding: 56px 24px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,196,0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .badge span { width: 6px; height: 6px; background: var(--teal); border-radius: 50%; display: block; }
+    header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    header h1 em { font-style: italic; color: #7eb8f0; }
+    header p {
+      color: rgba(255,255,255,0.55);
+      font-size: 14px;
+      font-weight: 300;
+    }
+    .meta {
+      display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
+      margin-top: 28px;
+    }
+    .meta span {
+      font-size: 12px; color: rgba(255,255,255,0.45);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px; padding: 4px 12px;
+    }
+
+    /* ── LAYOUT ── */
+    .wrapper {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--white);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin: 40px 0 48px;
+      box-shadow: 0 2px 12px rgba(15,31,61,0.06);
+    }
+    .toc h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1rem;
+      color: var(--navy);
+      margin-bottom: 16px;
+      letter-spacing: 0.02em;
+    }
+    .toc ol {
+      list-style: none;
+      columns: 2; column-gap: 32px;
+    }
+    .toc li { margin-bottom: 6px; break-inside: avoid; }
+    .toc a {
+      color: var(--sky);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .toc a:hover { color: var(--navy); }
+    @media (max-width: 600px) { .toc ol { columns: 1; } }
+
+    /* ── NOTICE BOX ── */
+    .notice {
+      background: var(--light);
+      border-left: 4px solid var(--blue);
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin: 24px 0;
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.65;
+    }
+    .notice strong { color: var(--blue); }
+
+    .warning {
+      background: #fff8ed;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin: 24px 0;
+      font-size: 14px;
+      color: #78350f;
+    }
+
+    /* ── SECTION ── */
+    section {
+      margin-bottom: 52px;
+      scroll-margin-top: 24px;
+    }
+    section h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.55rem;
+      color: var(--navy);
+      border-bottom: 2px solid var(--rule);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    section h2 .num {
+      background: var(--blue);
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 4px;
+      letter-spacing: 0.04em;
+    }
+    section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin: 24px 0 10px;
+    }
+    section p { margin-bottom: 12px; color: var(--body); font-size: 15px; }
+
+    /* ── LISTS ── */
+    ul.data-list {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 20px;
+    }
+    ul.data-list li {
+      padding: 10px 14px 10px 36px;
+      position: relative;
+      font-size: 14.5px;
+      border-bottom: 1px solid var(--rule);
+      color: var(--body);
+    }
+    ul.data-list li:last-child { border-bottom: none; }
+    ul.data-list li::before {
+      content: '→';
+      position: absolute; left: 12px;
+      color: var(--sky);
+      font-weight: 700;
+    }
+    ul.data-list.no-collect li::before { content: '✕'; color: #ef4444; }
+
+    /* ── PERMISSION TABLE ── */
+    .perm-grid {
+      display: grid;
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .perm-card {
+      background: var(--white);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 12px;
+      align-items: start;
+      box-shadow: 0 1px 4px rgba(15,31,61,0.05);
+    }
+    @media (max-width: 560px) { .perm-card { grid-template-columns: 1fr; } }
+    .perm-name {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.05em;
+      color: var(--white);
+      background: var(--navy);
+      border-radius: 6px; padding: 4px 10px;
+      text-align: center; align-self: start;
+      font-family: monospace;
+    }
+    .perm-desc { font-size: 13.5px; color: var(--body); line-height: 1.6; }
+
+    /* ── RIGHTS GRID ── */
+    .rights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .right-card {
+      background: var(--white);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 1px 4px rgba(15,31,61,0.04);
+    }
+    .right-card .right-title {
+      font-weight: 600; color: var(--navy); font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .right-card p { font-size: 13px; color: var(--soft); margin: 0; }
+
+    /* ── COMPLIANCE BADGES ── */
+    .compliance {
+      display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0;
+    }
+    .comp-badge {
+      border: 2px solid var(--rule);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .comp-badge span { display: block; font-size: 11px; font-weight: 400; color: var(--soft); margin-top: 2px; }
+
+    /* ── CONTACT ── */
+    .contact-box {
+      background: var(--navy);
+      border-radius: 12px;
+      padding: 28px 32px;
+      color: white;
+    }
+    .contact-box h3 { color: white; font-size: 1rem; margin-bottom: 16px; }
+    .contact-row {
+      display: flex; gap: 12px; align-items: baseline;
+      margin-bottom: 8px; font-size: 14px;
+    }
+    .contact-row .label { color: rgba(255,255,255,0.45); min-width: 80px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .contact-row .val { color: rgba(255,255,255,0.85); }
+    .contact-row a { color: #7eb8f0; text-decoration: none; }
+    .contact-row a:hover { text-decoration: underline; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      border-top: 1px solid var(--rule);
+      font-size: 12px;
+      color: var(--soft);
+    }
+    footer strong { color: var(--navy); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge"><span></span>Chrome Extension · Mental Health</div>
+  <h1>MindGuard — <em>Mental Health</em> Monitor</h1>
+  <p>Privacy Policy for the MindGuard Browser Extension</p>
+  <div class="meta">
+    <span>Effective: June 1, 2025</span>
+    <span>Last Updated: June 1, 2025</span>
+    <span>Version 1.0</span>
+  </div>
+</header>
+
+<div class="wrapper">
+
+  <!-- TOC -->
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#overview">1. Overview &amp; Purpose</a></li>
+      <li><a href="#data-collected">2. Data We Collect</a></li>
+      <li><a href="#how-we-use">3. How We Use Your Data</a></li>
+      <li><a href="#sharing">4. How We Share Your Data</a></li>
+      <li><a href="#consent">5. Guardian Consent &amp; Minor Policy</a></li>
+      <li><a href="#alerts">6. Alert &amp; Notification Policy</a></li>
+      <li><a href="#storage">7. Data Storage &amp; Security</a></li>
+      <li><a href="#permissions">8. Extension Permissions Explained</a></li>
+      <li><a href="#rights">9. Your Rights</a></li>
+      <li><a href="#compliance">10. Regulatory Compliance</a></li>
+      <li><a href="#updates">11. Policy Updates</a></li>
+      <li><a href="#contact">12. Contact Us</a></li>
+    </ol>
+  </nav>
+
+  <div class="notice">
+    <strong>Important Notice:</strong> MindGuard is designed for monitoring adolescents and young adults aged 13–25. Because it processes sensitive behavioral data on behalf of minors, this policy applies the highest standards of transparency, data minimization, and guardian oversight. Please read it carefully before installing the extension.
+  </div>
+
+  <!-- 1. Overview -->
+  <section id="overview">
+    <h2><span class="num">01</span> Overview &amp; Purpose</h2>
+    <p>MindGuard is a browser extension that passively monitors a user's online browsing behavior to detect early signals of emotional distress in adolescents and young adults. When distress indicators are identified, the extension notifies a designated guardian or trusted adult to enable timely support.</p>
+    <p>This Privacy Policy explains what data MindGuard collects, why it collects it, how it is stored and protected, who has access to it, and the rights of users and guardians. By installing and activating MindGuard, you and/or the guardian of the monitored user agree to the terms of this policy.</p>
+  </section>
+
+  <!-- 2. Data Collected -->
+  <section id="data-collected">
+    <h2><span class="num">02</span> Data We Collect</h2>
+
+    <h3>2.1 Browsing Behavioral Data</h3>
+    <p>MindGuard collects the following data from the active browser tab during browsing sessions:</p>
+    <ul class="data-list">
+      <li>URLs and domain names of websites visited</li>
+      <li>Search query terms entered into search engines</li>
+      <li>Keywords and topic categories detected on visited pages</li>
+      <li>Time spent (dwell time) on specific pages or content types</li>
+      <li>Session timestamps (date and time of browsing activity)</li>
+      <li>Frequency and pattern of visits to distress-related content categories</li>
+    </ul>
+
+    <h3>2.2 Behavioral Inferences</h3>
+    <p>MindGuard analyzes raw behavioral data to generate derived signals, including:</p>
+    <ul class="data-list">
+      <li>Distress score — a numeric indicator of potential emotional distress based on browsing patterns</li>
+      <li>Content category flags — classification of visited content into risk categories (e.g., self-harm, depression, crisis)</li>
+      <li>Session-level risk assessments — rolling evaluations across browsing sessions</li>
+    </ul>
+    <div class="warning">These inferences are interpretations, not medical or psychological diagnoses. MindGuard does not provide clinical evaluations of any kind.</div>
+
+    <h3>2.3 Configuration &amp; Consent Data</h3>
+    <ul class="data-list">
+      <li>Guardian email address or contact information for alert delivery</li>
+      <li>Alert threshold settings configured by the guardian</li>
+      <li>Consent records (date, method, and scope of consent)</li>
+      <li>Extension settings and preferences</li>
+    </ul>
+
+    <h3>2.4 Data We Do NOT Collect</h3>
+    <ul class="data-list no-collect">
+      <li>Passwords, form inputs, or financial information</li>
+      <li>Content from non-active (background) tabs</li>
+      <li>Camera, microphone, or location data</li>
+      <li>Social media messages or private communications</li>
+      <li>Biometric identifiers of any kind</li>
+    </ul>
+  </section>
+
+  <!-- 3. How We Use -->
+  <section id="how-we-use">
+    <h2><span class="num">03</span> How We Use Your Data</h2>
+    <p>MindGuard uses collected data strictly for the following purposes:</p>
+    <ul class="data-list">
+      <li><strong>Distress Detection</strong> — Analyzing browsing behavior to identify patterns associated with emotional distress or mental health crises.</li>
+      <li><strong>Guardian Alerts</strong> — Triggering notifications to the designated guardian when distress signals exceed a configured threshold.</li>
+      <li><strong>Session Logging</strong> — Maintaining a local record of distress events to help guardians understand behavioral trends over time.</li>
+      <li><strong>Extension Functionality</strong> — Storing settings and consent records to ensure the extension operates correctly across browser sessions.</li>
+    </ul>
+    <div class="notice">
+      <strong>No commercial use.</strong> MindGuard will never use collected data for advertising, commercial profiling, sale to third parties, or any purpose unrelated to the mental health monitoring functionality described in this policy.
+    </div>
+  </section>
+
+  <!-- 4. Sharing -->
+  <section id="sharing">
+    <h2><span class="num">04</span> How We Share Your Data</h2>
+
+    <h3>4.1 Parties We Share Data With</h3>
+    <p>MindGuard shares user data only with the following parties, and only as described:</p>
+    <ul class="data-list">
+      <li><strong>Designated Guardian</strong> — Alert notifications and distress event summaries are delivered to the guardian registered during setup. No other person receives this data without explicit guardian consent.</li>
+      <li><strong>Chrome Extension APIs (Google)</strong> — MindGuard uses Chrome's built-in storage, notification, tab, and alarm APIs. Google's standard Chrome Web Store policies govern this interaction. No browsing data is transmitted to Google beyond what is inherent in using a Chrome extension.</li>
+      <li><strong>Transactional Email Service (if applicable)</strong> — If email notifications are used, the guardian's email address is processed by a transactional email provider solely for alert delivery. This provider is bound by a Data Processing Agreement equivalent to this policy's standards.</li>
+    </ul>
+
+    <h3>4.2 Parties We Never Share Data With</h3>
+    <ul class="data-list no-collect">
+      <li>Advertisers or marketing platforms</li>
+      <li>Data brokers or analytics companies</li>
+      <li>Social media platforms</li>
+      <li>Schools, employers, or government bodies (except where legally compelled)</li>
+      <li>Any other third party not explicitly listed above</li>
+    </ul>
+
+    <h3>4.3 Legal Disclosures</h3>
+    <p>MindGuard may disclose data where required by applicable law, regulation, or valid legal process (e.g., a court order). Where permitted, we will notify the affected guardian before any such disclosure.</p>
+
+    <h3>4.4 Research Use</h3>
+    <p>If MindGuard data is ever used for academic research, it will be fully anonymized and de-identified beforehand. Such use requires separate, explicit opt-in consent from the guardian — completely independent of operational consent.</p>
+  </section>
+
+  <!-- 5. Consent -->
+  <section id="consent">
+    <h2><span class="num">05</span> Guardian Consent &amp; Minor User Policy</h2>
+    <p>For users under the age of 18, installation and activation of MindGuard requires verifiable consent from a parent or legal guardian before any data collection begins. A guardian must complete the setup process, review this Privacy Policy, and provide a valid contact address for alerts.</p>
+    <p>Where practically possible, the minor user will be informed that MindGuard is installed on their device. MindGuard does not support fully covert surveillance with zero disclosure to the monitored user.</p>
+  </section>
+
+  <!-- 6. Alerts -->
+  <section id="alerts">
+    <h2><span class="num">06</span> Alert &amp; Notification Policy</h2>
+    <h3>6.1 Alert Triggers</h3>
+    <p>Guardian alerts are triggered only when MindGuard's detection algorithm determines that browsing behavior meets or exceeds a configured distress threshold. Conditions include:</p>
+    <ul class="data-list">
+      <li>Repeated visits to content associated with self-harm, suicide, or crisis</li>
+      <li>Sustained engagement (high dwell time) with depression-related or crisis-related content</li>
+      <li>Accumulated distress score reaching the guardian-configured threshold within a session window</li>
+    </ul>
+    <h3>6.2 Alert Recipients</h3>
+    <p>Alerts are delivered only to the guardian contact registered during setup. MindGuard does not share alerts with schools, employers, healthcare providers, or any other third party without explicit, separate guardian consent.</p>
+    <h3>6.3 False Positives</h3>
+    <p>Distress detection is based on behavioral signals and may occasionally produce false positive alerts. Guardians can review the triggering data for any alert and adjust thresholds or dismiss flagged events within the extension dashboard.</p>
+    <h3>6.4 Minor Notification</h3>
+    <p>When an alert is sent to a guardian, the monitored user receives a notification within the extension interface informing them that a support alert has been triggered. MindGuard does not send silent alerts that are entirely invisible to the monitored user.</p>
+  </section>
+
+  <!-- 7. Storage -->
+  <section id="storage">
+    <h2><span class="num">07</span> Data Storage &amp; Security</h2>
+    <h3>7.1 Storage Location</h3>
+    <p>By default, all browsing data, distress scores, and session logs are stored locally on the user's device using the Chrome Extension Storage API. No browsing data is transmitted to external servers unless cloud sync features are explicitly enabled by the guardian.</p>
+    <h3>7.2 Security Standards</h3>
+    <ul class="data-list">
+      <li>All locally stored data is isolated within the extension's sandboxed storage environment</li>
+      <li>Any data transmitted (e.g., alert notifications) is encrypted in transit using TLS 1.3 or higher</li>
+      <li>MindGuard does not operate any external database storing personally identifiable browsing data</li>
+    </ul>
+    <h3>7.3 Data Retention &amp; Deletion</h3>
+    <p>Browsing session logs and distress event records are retained for a maximum of 90 days on-device, after which they are automatically purged. Guardians may delete all stored data at any time through extension settings. Uninstalling the extension permanently removes all locally stored data.</p>
+  </section>
+
+  <!-- 8. Permissions -->
+  <section id="permissions">
+    <h2><span class="num">08</span> Extension Permissions Explained</h2>
+    <p>MindGuard requests the following Chrome permissions. Each is necessary for a specific core function and no permission is requested beyond what is required.</p>
+    <div class="perm-grid">
+      <div class="perm-card">
+        <span class="perm-name">activeTab</span>
+        <div class="perm-desc">Allows MindGuard to analyze the content of the currently active tab in real time to detect distress-related keywords and behavioral signals. No background or inactive tab data is ever accessed.</div>
+      </div>
+      <div class="perm-card">
+        <span class="perm-name">storage</span>
+        <div class="perm-desc">Enables local saving of distress logs, alert thresholds, guardian contact details, and extension settings across browser sessions. All sensitive data remains on-device.</div>
+      </div>
+      <div class="perm-card">
+        <span class="perm-name">alarms</span>
+        <div class="perm-desc">Schedules periodic background checks (e.g., every 15 minutes) to evaluate accumulated session data for distress indicators, reducing resource usage while maintaining timely detection.</div>
+      </div>
+      <div class="perm-card">
+        <span class="perm-name">notifications</span>
+        <div class="perm-desc">Delivers in-browser alerts to the guardian when a distress threshold is exceeded. This permission is never used for promotional messages or any purpose unrelated to distress alerts.</div>
+      </div>
+      <div class="perm-card">
+        <span class="perm-name">&lt;all_urls&gt;</span>
+        <div class="perm-desc">Required to analyze page content across all websites visited by the monitored user. All analysis is performed locally on-device; no page content is transmitted to external servers. This broad permission is the minimum required to deliver cross-site distress detection.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. Rights -->
+  <section id="rights">
+    <h2><span class="num">09</span> Your Rights</h2>
+    <p>All users and guardians of MindGuard have the following rights, regardless of location:</p>
+    <div class="rights-grid">
+      <div class="right-card">
+        <div class="right-title">Right to Access</div>
+        <p>Request a copy of all data MindGuard holds about the monitored user.</p>
+      </div>
+      <div class="right-card">
+        <div class="right-title">Right to Correction</div>
+        <p>Request correction of any inaccurate stored data.</p>
+      </div>
+      <div class="right-card">
+        <div class="right-title">Right to Deletion</div>
+        <p>Request permanent deletion of all data. Also achieved by uninstalling the extension.</p>
+      </div>
+      <div class="right-card">
+        <div class="right-title">Right to Restriction</div>
+        <p>Pause data collection at any time without uninstalling.</p>
+      </div>
+      <div class="right-card">
+        <div class="right-title">Right to Portability</div>
+        <p>Receive all stored data in a portable, readable format (JSON or PDF).</p>
+      </div>
+      <div class="right-card">
+        <div class="right-title">Right to Object</div>
+        <p>Object to any specific data processing activity.</p>
+      </div>
+      <div class="right-card">
+        <div class="right-title">Right to Withdraw Consent</div>
+        <p>Withdraw consent at any time by disabling or uninstalling the extension, without penalty.</p>
+      </div>
+    </div>
+    <p style="margin-top:16px;">To exercise any of these rights, contact us at the address provided in Section 12.</p>
+  </section>
+
+  <!-- 10. Compliance -->
+  <section id="compliance">
+    <h2><span class="num">10</span> Regulatory Compliance</h2>
+    <div class="compliance">
+      <div class="comp-badge">NDPA 2023 <span>Nigeria</span></div>
+      <div class="comp-badge">NDPR <span>Nigeria</span></div>
+      <div class="comp-badge">GDPR / GDPR-K <span>European Union</span></div>
+      <div class="comp-badge">COPPA (2025 Rule) <span>United States</span></div>
+      <div class="comp-badge">Chrome Web Store Policies <span>Google</span></div>
+    </div>
+
+    <h3>Nigeria Data Protection Act (NDPA 2023) &amp; NDPR</h3>
+    <p>MindGuard processes data in accordance with the Nigeria Data Protection Act 2023 and the Nigeria Data Protection Regulation. This includes maintaining a lawful basis for all processing, upholding data subject rights, and implementing appropriate technical and organizational security measures.</p>
+
+    <h3>GDPR &amp; GDPR-K (EU)</h3>
+    <p>For users in the European Union, MindGuard complies with the General Data Protection Regulation, including Article 8 governing children's data. EU-based guardians have the full suite of rights including access, rectification, erasure, restriction, portability, and the right to object.</p>
+
+    <h3>COPPA (United States — 2025 Rule)</h3>
+    <p>MindGuard obtains verifiable parental consent before collecting data from users under 13 and does not share children's data with third parties without separate explicit parental consent, in accordance with the FTC's updated COPPA Rule effective June 23, 2025.</p>
+
+    <h3>Chrome Web Store Limited Use Policy</h3>
+    <p>MindGuard complies with Google's Limited Use Policy. Collected data is used solely to deliver the extension's stated mental health monitoring functionality and is not transferred, sold, or used for personalized advertising or any other commercial purpose.</p>
+  </section>
+
+  <!-- 11. Updates -->
+  <section id="updates">
+    <h2><span class="num">11</span> Policy Updates</h2>
+    <p>MindGuard may update this Privacy Policy to reflect changes in extension functionality, applicable law, or data practices. Material changes — particularly those affecting alert behavior, data sharing, or monitoring scope — will be communicated to guardians via registered email and through an in-extension notification at least <strong>14 days before</strong> the changes take effect.</p>
+    <p>Continued use of MindGuard after an updated policy's effective date constitutes acceptance of the revised terms. Guardians who do not agree may uninstall MindGuard and request deletion of all stored data before the effective date.</p>
+  </section>
+
+  <!-- 12. Contact -->
+  <section id="contact">
+    <h2><span class="num">12</span> Contact Us</h2>
+    <p>For questions, concerns, or to exercise your data rights, please contact the MindGuard team:</p>
+    <div class="contact-box">
+      <h3>MindGuard Privacy Contact</h3>
+      <div class="contact-row"><span class="label">Project</span><span class="val">MindGuard — Mental Health Monitor</span></div>
+      <div class="contact-row"><span class="label">Institution</span><span class="val">University Research Project (.edu.ng)</span></div>
+      <div class="contact-row"><span class="label">Email</span><span class="val"><a href="mailto:mindguard.privacy@[your-domain].edu.ng">mindguard.privacy@[your-domain].edu.ng</a></span></div>
+      <div class="contact-row"><span class="label">GitHub</span><span class="val"><a href="https://github.com/igbagboyemiii" target="_blank" rel="noopener">github.com/igbagboyemiii</a></span></div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <strong>MindGuard — Mental Health Monitor</strong> &nbsp;·&nbsp; Privacy Policy v1.0 &nbsp;·&nbsp; Effective June 1, 2025<br/>
+  <span style="margin-top:6px;display:block;">This policy was prepared in compliance with Chrome Web Store requirements, NDPA 2023, GDPR, and COPPA.</span>
+</footer>
+
+</body>
+</html>
