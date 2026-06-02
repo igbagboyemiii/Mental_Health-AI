@@ -210,28 +210,37 @@ corpus_texts:    list[dict]          = []
 db_store:        MonitorStorage      = None   # shared storage instance
 
 
-def load_resources():
-    """Load embedding model, build FAISS index from corpus."""
+async def load_resources_async():
+    """Load embedding model, build FAISS index from corpus asynchronously in background."""
     global embedding_model, faiss_index, embeddings, corpus_texts
 
+    # Wait 2 seconds for server to bind and DNS network to come fully online
+    await asyncio.sleep(2)
+
     try:
-        print("⏳ Initializing HF API Embedding client...")
+        print("⏳ Background: Initializing HF API Embedding client...")
         embedding_model = HFEmbeddingClient(EMBEDDING_MODEL_NAME)
 
         corpus_texts = SAMPLE_CORPUS
         texts        = [item["text"] for item in corpus_texts]
 
-        print("⏳ Building FAISS index via HF API embeddings...")
-        embeddings  = embedding_model.encode(texts, convert_to_numpy=True).astype("float32")
+        print("⏳ Background: Building FAISS index via HF API embeddings...")
+        
+        # Perform network call in a separate thread to keep server completely responsive
+        loop = asyncio.get_running_loop()
+        embeddings_numpy = await loop.run_in_executor(
+            None, lambda: embedding_model.encode(texts, convert_to_numpy=True)
+        )
+        
+        embeddings = embeddings_numpy.astype("float32")
         faiss_index = faiss.IndexFlatL2(embeddings.shape[1])  # dynamically use dimensions
         faiss_index.add(embeddings)
 
-        print(f"✅ FAISS index ready — {faiss_index.ntotal} vectors (dim: {embeddings.shape[1]})")
+        print(f"✅ Background: FAISS index ready — {faiss_index.ntotal} vectors (dim: {embeddings.shape[1]})")
     except Exception as e:
-        print(f"❌ CRITICAL Error during resource loading: {str(e)}")
+        print(f"❌ Background: Error during resource loading: {str(e)}")
         import traceback
         traceback.print_exc()
-        raise e
 
 
 # ─────────────────────────────────────────────────────────────
@@ -374,6 +383,11 @@ def full_risk_assessment(text: str, sentiment: float = 0.0, label: int = 0) -> d
 
 def retrieve_similar(query: str, top_k: int = 5) -> list[dict]:
     """Return top-k similar corpus entries via FAISS L2 search."""
+    global embedding_model, faiss_index
+    if embedding_model is None or faiss_index is None:
+        print("⚠️ Warning: FAISS index or embedding model not yet loaded. Returning empty similarity results.")
+        return []
+
     q_vec      = embedding_model.encode([query], convert_to_numpy=True).astype("float32")
     distances, indices = faiss_index.search(q_vec, min(top_k, faiss_index.ntotal))
 
@@ -504,10 +518,13 @@ def build_response(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global db_store
-    load_resources()
     db_store = MonitorStorage()
     db_store.migrate()   # non-destructive: adds new columns to existing DBs
-    print(f"🚀 API ready — {faiss_index.ntotal} vectors loaded")
+    
+    # Run the internet-dependent embedding load in background so server binds to port immediately
+    asyncio.create_task(load_resources_async())
+    
+    print("🚀 API starting in background resource-loading mode...")
     yield
     if db_store:
         db_store.close()
@@ -544,7 +561,7 @@ async def health_check():
         status        = "healthy",
         model_loaded  = embedding_model is not None,
         index_loaded  = faiss_index is not None and faiss_index.ntotal > 0,
-        total_vectors = faiss_index.ntotal if faiss_index else 0,
+        total_vectors = faiss_index.ntotal if faiss_index is not None else 0,
     )
 
 
