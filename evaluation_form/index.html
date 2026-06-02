@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindGuard — User Evaluation</title>
+  <meta name="description"
+    content="Evaluate MindGuard, an AI mental health support system. Quick 5-minute questionnaire." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --surface: #111827;
+      --surface2: #1a2235;
+      --border: rgba(99, 179, 237, 0.13);
+      --accent: #63b3ed;
+      --accent2: #9f7aea;
+      --accent3: #68d391;
+      --danger: #fc8181;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --soft: #cbd5e1;
+      --r: 14px;
+      --rs: 9px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -180px;
+      left: -180px;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, rgba(99, 179, 237, 0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -120px;
+      right: -120px;
+      width: 440px;
+      height: 440px;
+      background: radial-gradient(circle, rgba(159, 122, 234, 0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 36px 20px 72px;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 48px 24px 40px;
+      background: linear-gradient(135deg, rgba(99, 179, 237, 0.07), rgba(159, 122, 234, 0.07));
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      margin-bottom: 28px;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #63b3ed, #9f7aea);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .logo-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #63b3ed, #9f7aea);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.65;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      background: rgba(99, 179, 237, 0.1);
+      border: 1px solid rgba(99, 179, 237, 0.22);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+
+    .time-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    /* Progress */
+    .prog-wrap {
+      margin-bottom: 28px;
+    }
+
+    .prog-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    .prog-bar {
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .prog-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #63b3ed, #9f7aea);
+      width: 0%;
+      transition: width 0.4s;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 28px;
+      margin-bottom: 20px;
+      transition: border-color 0.25s;
+    }
+
+    .card:hover {
+      border-color: rgba(99, 179, 237, 0.2);
+    }
+
+    .sec-head {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sec-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(99, 179, 237, 0.18), rgba(159, 122, 234, 0.18));
+      border: 1px solid rgba(99, 179, 237, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: var(--accent);
+    }
+
+    .sec-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .sec-sub {
+      font-size: 0.77rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Fields */
+    .field {
+      margin-bottom: 22px;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--soft);
+      margin-bottom: 9px;
+    }
+
+    .req {
+      color: var(--danger);
+      margin-left: 3px;
+    }
+
+    .err {
+      display: none;
+      color: var(--danger);
+      font-size: 0.75rem;
+      margin-top: 5px;
+    }
+
+    .field.bad .err {
+      display: block;
+    }
+
+    /* Choices */
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .ci {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 11px 14px;
+      border-radius: var(--rs);
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .ci:hover {
+      border-color: rgba(99, 179, 237, 0.32);
+      background: rgba(99, 179, 237, 0.05);
+    }
+
+    .ci.sel {
+      border-color: rgba(99, 179, 237, 0.38);
+      background: rgba(99, 179, 237, 0.07);
+    }
+
+    .ci input {
+      display: none;
+    }
+
+    .cr {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 2px solid rgba(99, 179, 237, 0.38);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.18s;
+    }
+
+    .ci.sel .cr {
+      background: linear-gradient(135deg, #63b3ed, #9f7aea);
+      border-color: transparent;
+    }
+
+    .cr::after {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: white;
+      opacity: 0;
+      transition: opacity 0.18s;
+    }
+
+    .ci.sel .cr::after {
+      opacity: 1;
+    }
+
+    .cl {
+      font-size: 0.855rem;
+      color: var(--soft);
+    }
+
+    /* Likert — desktop table */
+    .ltable {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .ltable thead th {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 500;
+      padding: 6px 3px;
+      text-align: center;
+    }
+
+    .ltable thead th:first-child {
+      text-align: left;
+      min-width: 220px;
+    }
+
+    .lrow {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 0.13s;
+    }
+
+    .lrow:hover {
+      background: rgba(99, 179, 237, 0.04);
+    }
+
+    .lrow td {
+      padding: 12px 3px;
+      text-align: center;
+    }
+
+    .lrow td:first-child {
+      text-align: left;
+      font-size: 0.845rem;
+      color: var(--soft);
+      padding-right: 10px;
+      line-height: 1.45;
+    }
+
+    .qn {
+      color: var(--accent);
+      font-weight: 600;
+      margin-right: 5px;
+      font-size: 0.78rem;
+    }
+
+    .lradio {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid rgba(99, 179, 237, 0.28);
+      cursor: pointer;
+      transition: all 0.18s;
+      background: var(--surface2);
+    }
+
+    .lradio:hover {
+      border-color: var(--accent);
+    }
+
+    .lradio:checked {
+      background: linear-gradient(135deg, #63b3ed, #9f7aea);
+      border-color: transparent;
+      box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.13);
+    }
+
+    .scale-hint {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* Mobile likert */
+    @media (max-width: 580px) {
+      .ltable {
+        display: none;
+      }
+
+      .mob-l {
+        display: block;
+      }
+    }
+
+    @media (min-width: 581px) {
+      .mob-l {
+        display: none;
+      }
+    }
+
+    .mob-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .mob-qt {
+      font-size: 0.845rem;
+      color: var(--soft);
+      margin-bottom: 10px;
+      line-height: 1.45;
+    }
+
+    .mob-scale {
+      display: flex;
+      gap: 5px;
+    }
+
+    .msb {
+      flex: 1;
+      padding: 9px 2px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      text-align: center;
+      font-family: inherit;
+    }
+
+    .msb:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .msb.on {
+      background: linear-gradient(135deg, rgba(99, 179, 237, 0.18), rgba(159, 122, 234, 0.18));
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .mob-lbl {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Textarea */
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.855rem;
+      resize: vertical;
+      min-height: 80px;
+      outline: none;
+      line-height: 1.55;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      border-color: rgba(99, 179, 237, 0.46);
+      box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.07);
+    }
+
+    textarea::placeholder {
+      color: var(--muted);
+    }
+
+    /* NPS */
+    .nps-track {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .npsbtn {
+      width: 42px;
+      height: 42px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: inherit;
+    }
+
+    .npsbtn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .npsbtn.on {
+      background: linear-gradient(135deg, #63b3ed, #9f7aea);
+      border-color: transparent;
+      color: white;
+    }
+
+    .nps-lbl {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    /* Stars */
+    .stars {
+      display: flex;
+      gap: 6px;
+    }
+
+    .star {
+      font-size: 2rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.13);
+      transition: all 0.14s;
+    }
+
+    .star:hover,
+    .star.on {
+      color: #f6e05e;
+      transform: scale(1.12);
+    }
+
+    .star-lbl {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* Notice */
+    .notice {
+      background: rgba(99, 179, 237, 0.05);
+      border: 1px solid rgba(99, 179, 237, 0.14);
+      border-radius: var(--rs);
+      padding: 12px 15px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 22px;
+    }
+
+    .notice strong {
+      color: var(--accent);
+    }
+
+    /* Submit */
+    .sub-section {
+      text-align: center;
+      padding: 36px 0 0;
+    }
+
+    .sub-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 44px;
+      border-radius: 11px;
+      border: none;
+      background: linear-gradient(135deg, #63b3ed, #9f7aea);
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.28s;
+      box-shadow: 0 4px 22px rgba(99, 179, 237, 0.22);
+    }
+
+    .sub-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(99, 179, 237, 0.32);
+    }
+
+    .sub-note {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 12px;
+    }
+
+    hr.div {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 22px 0;
+    }
+
+    /* Success */
+    #success {
+      display: none;
+      text-align: center;
+      padding: 80px 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .s-icon {
+      font-size: 5rem;
+      margin-bottom: 22px;
+      animation: pop 0.45s cubic-bezier(.36, .07, .19, .97);
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0)
+      }
+
+      80% {
+        transform: scale(1.1)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    #success h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #63b3ed, #9f7aea);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #success p {
+      color: var(--muted);
+      max-width: 380px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app">
+    <div class="wrap">
+
+      <!-- Hero -->
+      <div class="hero">
+        <div class="logo">
+          <div class="logo-icon">🧠</div>
+          <span class="logo-name">MindGuard</span>
+        </div>
+        <h1>System Evaluation Questionnaire</h1>
+        <p>You just used MindGuard. Please share your honest experience — it takes about 5 minutes and is completely
+          anonymous.</p>
+        <span class="badge">📋 SUS — Objective 4 User Evaluation</span>
+        <div class="time-note">⏱ Estimated time: 5 minutes &nbsp;|&nbsp; 🔒 Anonymous</div>
+      </div>
+
+      <!-- Progress -->
+      <div class="prog-wrap">
+        <div class="prog-top">
+          <span id="prog-text">Section 1 of 6</span>
+          <span id="prog-pct">0%</span>
+        </div>
+        <div class="prog-bar">
+          <div class="prog-fill" id="prog-fill"></div>
+        </div>
+      </div>
+
+      <!-- ACTION: Replace YOUR_FORM_ID below after signing up free at formspree.io/new -->
+      <form id="form" action="https://formspree.io/f/mredwyer" method="POST" novalidate>
+
+        <!-- ── A: Background ── -->
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-num">A</div>
+            <div>
+              <div class="sec-title">About You</div>
+              <div class="sec-sub">Quick background information</div>
+            </div>
+          </div>
+
+          <div class="notice"><strong>Privacy:</strong> Completely anonymous. No personal data is stored. Used for
+            academic research only.</div>
+
+          <div class="field" id="f-age">
+            <label>Age group <span class="req">*</span></label>
+            <div class="choices">
+              <label class="ci"><input type="radio" name="age" value="under18" /><span class="cr"></span><span
+                  class="cl">Under 18</span></label>
+              <label class="ci"><input type="radio" name="age" value="18-24" /><span class="cr"></span><span
+                  class="cl">18 – 24</span></label>
+              <label class="ci"><input type="radio" name="age" value="25-34" /><span class="cr"></span><span
+                  class="cl">25 – 34</span></label>
+              <label class="ci"><input type="radio" name="age" value="35-44" /><span class="cr"></span><span
+                  class="cl">35 – 44</span></label>
+              <label class="ci"><input type="radio" name="age" value="45+" /><span class="cr"></span><span class="cl">45
+                  and above</span></label>
+            </div>
+            <div class="err">Please select your age group.</div>
+          </div>
+
+          <div class="field" id="f-gender">
+            <label>Gender <span class="req">*</span></label>
+            <div class="choices">
+              <label class="ci"><input type="radio" name="gender" value="male" /><span class="cr"></span><span
+                  class="cl">Male</span></label>
+              <label class="ci"><input type="radio" name="gender" value="female" /><span class="cr"></span><span
+                  class="cl">Female</span></label>
+              <label class="ci"><input type="radio" name="gender" value="prefer-not" /><span class="cr"></span><span
+                  class="cl">Prefer not to say</span></label>
+            </div>
+            <div class="err">Please select your gender.</div>
+          </div>
+
+          <div class="field" id="f-edu">
+            <label>Education level <span class="req">*</span></label>
+            <div class="choices">
+              <label class="ci"><input type="radio" name="edu" value="primary" /><span class="cr"></span><span
+                  class="cl">Primary / Junior Secondary</span></label>
+              <label class="ci"><input type="radio" name="edu" value="secondary" /><span class="cr"></span><span
+                  class="cl">Senior Secondary / O'Level</span></label>
+              <label class="ci"><input type="radio" name="edu" value="undergrad" /><span class="cr"></span><span
+                  class="cl">Undergraduate (in progress)</span></label>
+              <label class="ci"><input type="radio" name="edu" value="degree" /><span class="cr"></span><span
+                  class="cl">Bachelor's Degree or higher</span></label>
+            </div>
+            <div class="err">Please select your education level.</div>
+          </div>
+
+          <div class="field" id="f-role">
+            <label>Your relationship to mental health <span class="req">*</span></label>
+            <div class="choices">
+              <label class="ci"><input type="radio" name="role" value="general" /><span class="cr"></span><span
+                  class="cl">General user / someone seeking support</span></label>
+              <label class="ci"><input type="radio" name="role" value="student" /><span class="cr"></span><span
+                  class="cl">Student</span></label>
+              <label class="ci"><input type="radio" name="role" value="guardian" /><span class="cr"></span><span
+                  class="cl">Parent / guardian of someone at risk</span></label>
+              <label class="ci"><input type="radio" name="role" value="professional" /><span class="cr"></span><span
+                  class="cl">Mental health professional</span></label>
+              <label class="ci"><input type="radio" name="role" value="researcher" /><span class="cr"></span><span
+                  class="cl">Researcher / Academic</span></label>
+            </div>
+            <div class="err">Please select your role.</div>
+          </div>
+
+          <div class="field" id="f-ai">
+            <label>Have you used an AI chatbot before? <span class="req">*</span></label>
+            <div class="choices">
+              <label class="ci"><input type="radio" name="ai_exp" value="yes-often" /><span class="cr"></span><span
+                  class="cl">Yes, regularly</span></label>
+              <label class="ci"><input type="radio" name="ai_exp" value="yes-few" /><span class="cr"></span><span
+                  class="cl">Yes, a few times</span></label>
+              <label class="ci"><input type="radio" name="ai_exp" value="no" /><span class="cr"></span><span
+                  class="cl">No, first time</span></label>
+            </div>
+            <div class="err">Please answer this question.</div>
+          </div>
+        </div>
+
+        <!-- ── B: SUS ── -->
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-num">B</div>
+            <div>
+              <div class="sec-title">Usability (SUS)</div>
+              <div class="sec-sub">1 = Strongly Disagree &nbsp;·&nbsp; 5 = Strongly Agree</div>
+            </div>
+          </div>
+          <div class="scale-hint"><span>1 — Strongly Disagree</span><span>3 — Neutral</span><span>5 — Strongly
+              Agree</span></div>
+          <table class="ltable">
+            <thead>
+              <tr>
+                <th>Statement</th>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>5</th>
+              </tr>
+            </thead>
+            <tbody id="sus-tb"></tbody>
+          </table>
+          <div class="mob-l" id="sus-mob"></div>
+        </div>
+
+        <!-- ── C: AI Quality ── -->
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-num">C</div>
+            <div>
+              <div class="sec-title">AI Response Quality</div>
+              <div class="sec-sub">1 = Strongly Disagree &nbsp;·&nbsp; 5 = Strongly Agree</div>
+            </div>
+          </div>
+          <div class="scale-hint"><span>1 — Strongly Disagree</span><span>3 — Neutral</span><span>5 — Strongly
+              Agree</span></div>
+          <table class="ltable">
+            <thead>
+              <tr>
+                <th>Statement</th>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>5</th>
+              </tr>
+            </thead>
+            <tbody id="ai-tb"></tbody>
+          </table>
+          <div class="mob-l" id="ai-mob"></div>
+        </div>
+
+        <!-- ── D: Privacy ── -->
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-num">D</div>
+            <div>
+              <div class="sec-title">Trust & Safety</div>
+              <div class="sec-sub">1 = Strongly Disagree &nbsp;·&nbsp; 5 = Strongly Agree</div>
+            </div>
+          </div>
+          <div class="scale-hint"><span>1 — Strongly Disagree</span><span>3 — Neutral</span><span>5 — Strongly
+              Agree</span></div>
+          <table class="ltable">
+            <thead>
+              <tr>
+                <th>Statement</th>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>5</th>
+              </tr>
+            </thead>
+            <tbody id="pr-tb"></tbody>
+          </table>
+          <div class="mob-l" id="pr-mob"></div>
+        </div>
+
+        <!-- ── E: Open Feedback ── -->
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-num">E</div>
+            <div>
+              <div class="sec-title">Your Feedback</div>
+              <div class="sec-sub">Optional written comments</div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="q-like">What did you like most about MindGuard?</label>
+            <textarea id="q-like" name="liked" placeholder="e.g. The AI responses felt caring…"></textarea>
+          </div>
+          <div class="field">
+            <label for="q-hard">What was most difficult or frustrating?</label>
+            <textarea id="q-hard" name="hard" placeholder="e.g. The response was too slow…"></textarea>
+          </div>
+          <div class="field">
+            <label for="q-imp">What would you improve?</label>
+            <textarea id="q-imp" name="improve" placeholder="e.g. Add voice input…"></textarea>
+          </div>
+        </div>
+
+        <!-- ── F: Overall ── -->
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-num">F</div>
+            <div>
+              <div class="sec-title">Overall Rating</div>
+              <div class="sec-sub">Final impressions</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>How likely would you recommend MindGuard to someone? <span class="req">*</span><br /><small
+                style="color:var(--muted);font-weight:400;">(1 = Not likely &nbsp;·&nbsp; 10 = Very
+                likely)</small></label>
+            <div class="nps-track" id="nps-track" style="margin-top:10px;"></div>
+            <div class="nps-lbl"><span>Not likely</span><span>Very likely</span></div>
+            <input type="hidden" name="nps" id="nps-val" />
+            <input type="hidden" name="_subject" value="MindGuard Evaluation Response" />
+            <div class="err" id="nps-err">Please select a rating.</div>
+          </div>
+
+          <hr class="div" />
+
+          <div class="field">
+            <label>Overall experience with MindGuard <span class="req">*</span></label>
+            <div class="stars" id="star-group"></div>
+            <div class="star-lbl" id="star-lbl">Click to rate</div>
+            <input type="hidden" name="star" id="star-val" />
+            <div class="err" id="star-err">Please give an overall star rating.</div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="sub-section">
+          <button type="submit" class="sub-btn">🚀 Submit Evaluation</button>
+          <div class="sub-note">Completely anonymous · For academic research only</div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div id="success">
+    <div class="s-icon">🎉</div>
+    <h2>Thank You!</h2>
+    <p>Your evaluation has been recorded. Your feedback will help improve mental health AI for everyone. We appreciate
+      your time.</p>
+    <p style="color:var(--accent);font-size:0.83rem;margin-top:16px;">— MindGuard Research Team</p>
+  </div>
+
+  <script>
+    // ── Question data ─────────────────────────────────────────────
+    const SUS = [
+      { id: 's1', pos: true, t: 'I would use MindGuard regularly.' },
+      { id: 's2', pos: false, t: 'MindGuard felt too complex.' },
+      { id: 's3', pos: true, t: 'MindGuard was easy to use.' },
+      { id: 's4', pos: false, t: 'I would need help to use MindGuard.' },
+      { id: 's5', pos: true, t: 'The features worked well together.' },
+      { id: 's6', pos: false, t: 'MindGuard felt inconsistent.' },
+      { id: 's7', pos: true, t: 'Most people would learn this quickly.' },
+      { id: 's8', pos: false, t: 'MindGuard was hard to navigate.' },
+      { id: 's9', pos: true, t: 'I felt confident using MindGuard.' },
+      { id: 's10', pos: false, t: 'MindGuard required a lot of learning upfront.' },
+    ];
+
+    const AI = [
+      { id: 'a1', t: "The AI's response felt empathetic." },
+      { id: 'a2', t: 'The AI correctly detected distress in my text.' },
+      { id: 'a3', t: 'The risk level assigned seemed accurate.' },
+      { id: 'a4', t: "The response matched what I actually typed." },
+      { id: 'a5', t: 'The AI was clear that it is not a human therapist.' },
+      { id: 'a6', t: 'The crisis resources shown were appropriate.' },
+      { id: 'a7', t: 'The AI responded in a reasonable time.' },
+    ];
+
+    const PR = [
+      { id: 'p1', t: 'I felt safe using MindGuard.' },
+      { id: 'p2', t: 'I trust MindGuard with my mental health data.' },
+      { id: 'p3', t: 'MindGuard could help people dealing with depression.' },
+      { id: 'p4', t: 'Alerting a guardian in a crisis situation is acceptable.' },
+      { id: 'p5', t: 'MindGuard is a useful complement to professional care.' },
+    ];
+
+    const starLabels = ['Very Poor', 'Poor', 'Average', 'Good', 'Excellent'];
+    let curStar = 0;
+
+    // ── Build likert tables ───────────────────────────────────────
+    function buildTable(items, tbId, mobId, offset) {
+      const tb = document.getElementById(tbId);
+      const mob = document.getElementById(mobId);
+      items.forEach((item, i) => {
+        const n = i + 1 + offset;
+        // Desktop row
+        const tr = document.createElement('tr');
+        tr.className = 'lrow';
+        tr.innerHTML = `<td><span class="qn">Q${n}.</span>${item.t}</td>`
+          + [1, 2, 3, 4, 5].map(v => `<td><input class="lradio" type="radio" name="${item.id}" value="${v}" /></td>`).join('');
+        tb.appendChild(tr);
+        // Mobile card
+        const d = document.createElement('div');
+        d.className = 'mob-item';
+        d.innerHTML = `<div class="mob-qt"><span class="qn">Q${n}.</span>${item.t}</div>
+      <div class="mob-scale" id="mob-${item.id}">${[1, 2, 3, 4, 5].map(v => `<button type="button" class="msb" data-n="${item.id}" data-v="${v}">${v}</button>`).join('')}</div>
+      <div class="mob-lbl"><span>Strongly Disagree</span><span>Strongly Agree</span></div>`;
+        mob.appendChild(d);
+      });
+    }
+
+    buildTable(SUS, 'sus-tb', 'sus-mob', 0);
+    buildTable(AI, 'ai-tb', 'ai-mob', 10);
+    buildTable(PR, 'pr-tb', 'pr-mob', 17);
+
+    // Mobile button click
+    document.addEventListener('click', e => {
+      if (!e.target.classList.contains('msb')) return;
+      const n = e.target.dataset.n, v = e.target.dataset.v;
+      document.querySelectorAll(`[data-n="${n}"]`).forEach(b => b.classList.remove('on'));
+      e.target.classList.add('on');
+      const r = document.querySelector(`input[name="${n}"][value="${v}"]`);
+      if (r) r.checked = true;
+      prog();
+    });
+
+    // Desktop radio → sync mobile
+    document.addEventListener('change', e => {
+      if (!e.target.classList.contains('lradio')) return;
+      const n = e.target.name, v = e.target.value;
+      document.querySelectorAll(`[data-n="${n}"]`).forEach(b => b.classList.remove('on'));
+      const mb = document.querySelector(`[data-n="${n}"][data-v="${v}"]`);
+      if (mb) mb.classList.add('on');
+      prog();
+    });
+
+    // Radio choice visual
+    document.querySelectorAll('.ci').forEach(ci => {
+      ci.addEventListener('click', () => {
+        const nm = ci.querySelector('input')?.name;
+        if (nm) document.querySelectorAll(`input[name="${nm}"]`).forEach(r => r.closest('.ci')?.classList.remove('sel'));
+        ci.classList.add('sel');
+        prog();
+      });
+    });
+
+    // NPS
+    const npsTrack = document.getElementById('nps-track');
+    for (let i = 1; i <= 10; i++) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'npsbtn'; b.textContent = i;
+      b.onclick = () => {
+        document.querySelectorAll('.npsbtn').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+        document.getElementById('nps-val').value = i;
+        document.getElementById('nps-err').style.display = 'none';
+        prog();
+      };
+      npsTrack.appendChild(b);
+    }
+
+    // Stars
+    const sg = document.getElementById('star-group');
+    for (let i = 1; i <= 5; i++) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'star'; b.textContent = '★'; b.dataset.v = i;
+      b.onmouseenter = () => hl(i);
+      b.onmouseleave = () => hl(curStar);
+      b.onclick = () => {
+        curStar = i;
+        document.getElementById('star-val').value = i;
+        document.getElementById('star-lbl').textContent = starLabels[i - 1];
+        hl(i);
+        document.getElementById('star-err').style.display = 'none';
+        prog();
+      };
+      sg.appendChild(b);
+    }
+    function hl(n) { document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('on', i < n)); }
+
+    // Progress
+    function prog() {
+      const bgDone = ['age', 'gender', 'edu', 'role', 'ai_exp'].every(n => document.querySelector(`input[name="${n}"]:checked`));
+      const susDone = SUS.every(i => document.querySelector(`input[name="${i.id}"]:checked`));
+      const aiDone = AI.every(i => document.querySelector(`input[name="${i.id}"]:checked`));
+      const prDone = PR.every(i => document.querySelector(`input[name="${i.id}"]:checked`));
+      const nps = !!document.getElementById('nps-val').value;
+      const star = !!document.getElementById('star-val').value;
+      const done = [bgDone, susDone, aiDone, prDone, true, (nps && star)].filter(Boolean).length;
+      const pct = Math.round(done / 6 * 100);
+      document.getElementById('prog-fill').style.width = pct + '%';
+      document.getElementById('prog-pct').textContent = pct + '%';
+      document.getElementById('prog-text').textContent = done < 6 ? `${done} of 6 sections done` : 'All done — ready to submit!';
+    }
+
+    // Submit
+    document.getElementById('form').addEventListener('submit', async e => {
+      e.preventDefault();
+      let ok = true;
+
+      // Validate background
+      [['f-age', 'age'], ['f-gender', 'gender'], ['f-edu', 'edu'], ['f-role', 'role'], ['f-ai', 'ai_exp']].forEach(([fid, nm]) => {
+        const el = document.getElementById(fid);
+        if (!document.querySelector(`input[name="${nm}"]:checked`)) { el.classList.add('bad'); ok = false; }
+        else el.classList.remove('bad');
+      });
+
+      // Validate likert
+      [...SUS, ...AI, ...PR].forEach(item => {
+        if (!document.querySelector(`input[name="${item.id}"]:checked`)) ok = false;
+      });
+
+      if (!document.getElementById('nps-val').value) { document.getElementById('nps-err').style.display = 'block'; ok = false; }
+      if (!document.getElementById('star-val').value) { document.getElementById('star-err').style.display = 'block'; ok = false; }
+
+      if (!ok) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+
+      // Compute SUS score and inject into hidden field
+      let ss = 0;
+      SUS.forEach(item => {
+        const v = +document.querySelector(`input[name="${item.id}"]:checked`)?.value || 0;
+        ss += item.pos ? (v - 1) : (5 - v);
+      });
+      const susScore = ss * 2.5;
+
+      // Inject computed fields as hidden inputs
+      const injectHidden = (name, value) => {
+        let el = document.getElementById('hidden-' + name);
+        if (!el) { el = document.createElement('input'); el.type = 'hidden'; el.id = 'hidden-' + name; el.name = name; document.getElementById('form').appendChild(el); }
+        el.value = value;
+      };
+      injectHidden('sus_score', susScore);
+      injectHidden('timestamp', new Date().toISOString());
+
+      // Disable submit button
+      const btn = document.querySelector('.sub-btn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Submitting…';
+
+      // Check if Formspree is configured
+      const formAction = document.getElementById('form').action;
+      const hasFormspree = formAction && !formAction.includes('YOUR_FORM_ID');
+
+      if (hasFormspree) {
+        try {
+          const formData = new FormData(document.getElementById('form'));
+          const res = await fetch(formAction, { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
+          if (res.ok) {
+            showSuccess();
+          } else {
+            btn.disabled = false;
+            btn.textContent = '🚀 Submit Evaluation';
+            alert('Submission failed. Please try again.');
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = '🚀 Submit Evaluation';
+          alert('Network error. Please check your connection.');
+        }
+      } else {
+        // Formspree not configured — log locally and show success anyway (dev/demo mode)
+        console.log('📊 [Demo Mode] MindGuard Evaluation — SUS Score:', susScore);
+        showSuccess();
+      }
+    });
+
+    function showSuccess() {
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('success').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    prog();
+  </script>
+</body>
+
+</html>

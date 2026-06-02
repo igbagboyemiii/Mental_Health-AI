@@ -8,7 +8,7 @@ httpx>=0.27.0
 python-multipart>=0.0.9
 
 # ── AI / ML ───────────────────────────────────────────────────
-sentence-transformers>=2.7.0
+# sentence-transformers>=2.7.0 (Removed to avoid installing PyTorch on Render server)
 faiss-cpu>=1.8.0
 numpy>=1.26.0
 openai>=1.30.0          # used with Groq base_url

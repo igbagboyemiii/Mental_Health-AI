@@ -25,11 +25,12 @@ from contextlib import asynccontextmanager
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import date as DateType
-from sentence_transformers import SentenceTransformer
 from scoring.indicators import compute_scores, INDICATORS
 from risk.classifier import classify, RISK_TIERS
 from monitor_storage import MonitorStorage
 from crisis_engine import crisis_engine
+import requests
+import time
 
 nest_asyncio.apply()
 
@@ -158,7 +159,44 @@ RAG_RESPONSES = {
 # Global State  (loaded once at startup)
 # ─────────────────────────────────────────────────────────────
 
-embedding_model: SentenceTransformer = None
+class HFEmbeddingClient:
+    def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
+        if "/" not in model_name:
+            self.model_name = f"sentence-transformers/{model_name}"
+        else:
+            self.model_name = model_name
+        self.api_url = f"https://api-inference.huggingface.co/models/{self.model_name}"
+        # Fallback to a default public token if needed, or let user set HF_TOKEN in Render environment
+        self.hf_token = os.getenv("HF_TOKEN")
+
+    def encode(self, texts: list[str], convert_to_numpy: bool = True) -> np.ndarray:
+        headers = {}
+        if self.hf_token:
+            headers["Authorization"] = f"Bearer {self.hf_token}"
+        
+        # Hugging Face API can return 503 if model is loading, so we handle retries
+        for attempt in range(5):
+            try:
+                response = requests.post(self.api_url, headers=headers, json={"inputs": texts}, timeout=15)
+                data = response.json()
+                if response.status_code == 200:
+                    if isinstance(data, list):
+                        return np.array(data, dtype=np.float32)
+                    raise ValueError(f"Unexpected response format: {data}")
+                elif response.status_code == 503 and isinstance(data, dict) and "estimated_time" in data:
+                    wait_time = min(data.get("estimated_time", 5), 10)
+                    print(f"⏳ Hugging Face model loading, waiting {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    raise Exception(f"HF API Error ({response.status_code}): {data}")
+            except Exception as e:
+                if attempt == 4:
+                    raise e
+                time.sleep(2)
+        raise RuntimeError("Failed to generate embeddings from HF API.")
+
+
+embedding_model: HFEmbeddingClient = None
 faiss_index:     faiss.IndexFlatL2   = None
 embeddings:      np.ndarray          = None
 corpus_texts:    list[dict]          = []
@@ -169,13 +207,13 @@ def load_resources():
     """Load embedding model, build FAISS index from corpus."""
     global embedding_model, faiss_index, embeddings, corpus_texts
 
-    print("⏳ Loading embedding model...")
-    embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
+    print("⏳ Initializing HF API Embedding client...")
+    embedding_model = HFEmbeddingClient(EMBEDDING_MODEL_NAME)
 
     corpus_texts = SAMPLE_CORPUS
     texts        = [item["text"] for item in corpus_texts]
 
-    print("⏳ Building FAISS index...")
+    print("⏳ Building FAISS index via HF API embeddings...")
     embeddings  = embedding_model.encode(texts, convert_to_numpy=True).astype("float32")
     faiss_index = faiss.IndexFlatL2(EMBEDDING_DIM)
     faiss_index.add(embeddings)
