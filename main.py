@@ -184,7 +184,11 @@ class HFEmbeddingClient:
                 data = response.json()
                 if response.status_code == 200:
                     if isinstance(data, list):
-                        return np.array(data, dtype=np.float32)
+                        arr = np.array(data, dtype=np.float32)
+                        # If the Hugging Face API returns a 3D array (token embeddings), mean-pool it to 2D
+                        if len(arr.shape) == 3:
+                            arr = np.mean(arr, axis=1)
+                        return arr
                     raise ValueError(f"Unexpected response format: {data}")
                 elif response.status_code == 503 and isinstance(data, dict) and "estimated_time" in data:
                     wait_time = min(data.get("estimated_time", 5), 10)
@@ -210,18 +214,24 @@ def load_resources():
     """Load embedding model, build FAISS index from corpus."""
     global embedding_model, faiss_index, embeddings, corpus_texts
 
-    print("⏳ Initializing HF API Embedding client...")
-    embedding_model = HFEmbeddingClient(EMBEDDING_MODEL_NAME)
+    try:
+        print("⏳ Initializing HF API Embedding client...")
+        embedding_model = HFEmbeddingClient(EMBEDDING_MODEL_NAME)
 
-    corpus_texts = SAMPLE_CORPUS
-    texts        = [item["text"] for item in corpus_texts]
+        corpus_texts = SAMPLE_CORPUS
+        texts        = [item["text"] for item in corpus_texts]
 
-    print("⏳ Building FAISS index via HF API embeddings...")
-    embeddings  = embedding_model.encode(texts, convert_to_numpy=True).astype("float32")
-    faiss_index = faiss.IndexFlatL2(EMBEDDING_DIM)
-    faiss_index.add(embeddings)
+        print("⏳ Building FAISS index via HF API embeddings...")
+        embeddings  = embedding_model.encode(texts, convert_to_numpy=True).astype("float32")
+        faiss_index = faiss.IndexFlatL2(embeddings.shape[1])  # dynamically use dimensions
+        faiss_index.add(embeddings)
 
-    print(f"✅ FAISS index ready — {faiss_index.ntotal} vectors")
+        print(f"✅ FAISS index ready — {faiss_index.ntotal} vectors (dim: {embeddings.shape[1]})")
+    except Exception as e:
+        print(f"❌ CRITICAL Error during resource loading: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise e
 
 
 # ─────────────────────────────────────────────────────────────
