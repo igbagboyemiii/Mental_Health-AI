@@ -146,7 +146,7 @@ nav{background:linear-gradient(135deg,#0d1520,#0a1628);border-bottom:1px solid #
 </div>
 
 <script>
-const API = 'http://localhost:8000';
+const API = (window.location.protocol.substring(0, 4) === 'http') ? window.location.origin : 'http://localhost:8000';
 let currentGId = localStorage.getItem('mg_guardian_id') || '';
 if (currentGId) { document.getElementById('gid-input').value = currentGId; }
 
