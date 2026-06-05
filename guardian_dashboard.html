@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MindGuard — Guardian Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#060a12;color:#c9d8f0;font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+a{color:#38bdf8;text-decoration:none}
+
+/* NAV */
+nav{background:linear-gradient(135deg,#0d1520,#0a1628);border-bottom:1px solid #1e2d45;
+    padding:14px 32px;display:flex;align-items:center;gap:12px}
+.nav-logo{color:#06b6d4;font-size:22px}
+.nav-title{font-size:18px;font-weight:800;color:#e8f0ff;letter-spacing:.5px}
+.nav-sub{font-size:11px;color:#4a6080;margin-top:1px}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.api-dot{width:8px;height:8px;border-radius:50%;background:#4a6080}
+.api-dot.ok{background:#10b981} .api-dot.err{background:#ef4444}
+#api-txt{font-size:11px;color:#4a6080}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:80vh}
+.login-card{background:#0d1520;border:1px solid #1e2d45;border-radius:16px;padding:36px;width:360px}
+.login-card h2{font-size:20px;font-weight:700;color:#e8f0ff;margin-bottom:6px}
+.login-card p{font-size:12px;color:#4a6080;margin-bottom:20px;line-height:1.6}
+.inp{width:100%;padding:10px 14px;background:#060a12;border:1px solid #1e2d45;border-radius:8px;
+     color:#cdd9f0;font-family:inherit;font-size:13px;outline:none;transition:border-color .2s;margin-bottom:12px}
+.inp:focus{border-color:#2563eb}
+.btn{width:100%;padding:11px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;
+     font-size:13px;font-weight:600;transition:opacity .2s}
+.btn:hover{opacity:.88} .btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,#1d4ed8,#06b6d4);color:#fff}
+.btn-green{background:linear-gradient(135deg,#059669,#10b981);color:#fff}
+.btn-sm{width:auto;padding:6px 14px;font-size:11px}
+.msg{padding:8px 12px;border-radius:6px;font-size:12px;margin-bottom:10px;display:none}
+.msg.err{background:#3a1a1a;color:#f87171;display:block}
+.msg.ok{background:#1a3a2a;color:#4ade80;display:block}
+
+/* DASHBOARD */
+#dashboard{display:none;padding:28px 32px;max-width:1100px;margin:0 auto}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.dash-title{font-size:22px;font-weight:800;color:#e8f0ff}
+.dash-sub{font-size:12px;color:#4a6080;margin-top:3px}
+.guardian-chip{background:#1a2a4a;color:#60a5fa;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+
+/* Summary cards */
+.summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px}
+.sum-card{background:#0d1520;border:1px solid #1e2d45;border-radius:12px;padding:18px}
+.sum-val{font-size:32px;font-weight:800;color:#e8f0ff}
+.sum-key{font-size:11px;color:#4a6080;margin-top:4px;letter-spacing:.5px;text-transform:uppercase}
+
+/* Ward grid */
+.wards-title{font-size:15px;font-weight:700;color:#e8f0ff;margin-bottom:14px}
+.ward-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.ward-card{background:#0d1520;border:1px solid #1e2d45;border-radius:14px;overflow:hidden;
+           transition:border-color .2s,box-shadow .2s}
+.ward-card:hover{border-color:#2563eb;box-shadow:0 0 20px rgba(37,99,235,.12)}
+.wc-head{padding:18px;border-bottom:1px solid #1e2d45;display:flex;align-items:center;gap:12px}
+.wc-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#1d4ed8,#06b6d4);
+           display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0}
+.wc-name{font-size:15px;font-weight:700;color:#e8f0ff}
+.wc-meta{font-size:11px;color:#4a6080;margin-top:2px}
+.wc-trend{margin-left:auto;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600;flex-shrink:0}
+.tr-escalating{background:#4c1d1d;color:#f87171}
+.tr-stable{background:#1a2d1a;color:#4ade80}
+.tr-improving{background:#1a2641;color:#60a5fa}
+.tr-none{background:#1e2d45;color:#4a6080}
+
+.wc-body{padding:16px}
+.wc-stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.wcs{background:#060a12;border:1px solid #1e2d45;border-radius:8px;padding:10px;text-align:center}
+.wcs-val{font-size:20px;font-weight:700;color:#e8f0ff}
+.wcs-key{font-size:9px;color:#4a6080;margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+
+/* Progress bar */
+.prog-bar{background:#1e2d45;border-radius:100px;height:6px;margin:8px 0 4px}
+.prog-fill{height:6px;border-radius:100px;transition:width .4s}
+
+.crisis-list{margin-top:10px}
+.crisis-item{padding:8px 10px;background:#1a0d0d;border:1px solid #3a1a1a;border-radius:6px;
+             margin-bottom:5px;font-size:11px;color:#fca5a5}
+.crisis-time{font-size:10px;color:#6b7280;margin-top:2px}
+.no-crisis{font-size:11px;color:#4a6080;padding:6px 0}
+
+.wc-id{font-size:9px;color:#2a4a7f;font-family:monospace;margin-top:8px}
+.refresh-btn{background:none;border:1px solid #1e2d45;color:#4a6080;padding:5px 12px;
+             border-radius:6px;cursor:pointer;font-size:11px;font-family:inherit;transition:all .2s}
+.refresh-btn:hover{border-color:#2563eb;color:#93c5fd}
+.empty-dash{text-align:center;padding:60px 20px;color:#4a6080}
+.empty-dash div{font-size:48px;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">◆</span>
+  <div>
+    <div class="nav-title">MindGuard</div>
+    <div class="nav-sub">Guardian Dashboard — Adolescent Wellbeing Monitor</div>
+  </div>
+  <div class="nav-right">
+    <div class="api-dot" id="api-dot"></div>
+    <span id="api-txt">Connecting…</span>
+    <button class="refresh-btn" id="refresh-btn" style="display:none" onclick="loadDashboard()">↺ Refresh</button>
+  </div>
+</nav>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <h2>🛡 Guardian Login</h2>
+    <p>Enter your Guardian ID to view your linked children's monitoring data.</p>
+    <div id="login-msg" class="msg"></div>
+    <input class="inp" type="text" id="gid-input" placeholder="e.g. G-AB12CD"
+           style="text-transform:uppercase;letter-spacing:3px;font-size:15px;text-align:center">
+    <button class="btn btn-primary" id="login-btn" onclick="login()">View Dashboard</button>
+    <p style="font-size:11px;color:#4a6080;margin-top:14px;text-align:center;line-height:1.6">
+      Your Guardian ID was provided when you created your account in the MindGuard browser extension.
+    </p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="dash-header">
+    <div>
+      <div class="dash-title" id="dash-title">Guardian Dashboard</div>
+      <div class="dash-sub" id="dash-sub">Loading…</div>
+    </div>
+    <span class="guardian-chip" id="gid-chip"></span>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-row">
+    <div class="sum-card"><div class="sum-val" id="s-wards">—</div><div class="sum-key">Children Monitored</div></div>
+    <div class="sum-card"><div class="sum-val" id="s-crises" style="color:#ef4444">—</div><div class="sum-key">Crisis Alerts (14d)</div></div>
+    <div class="sum-card"><div class="sum-val" id="s-escalating" style="color:#f97316">—</div><div class="sum-key">Escalating Trends</div></div>
+    <div class="sum-card"><div class="sum-val" id="s-avg" style="color:#06b6d4">—</div><div class="sum-key">Avg Risk Score</div></div>
+  </div>
+
+  <div class="wards-title">Monitored Children</div>
+  <div class="ward-grid" id="ward-grid"></div>
+</div>
+
+<script>
+const API = 'http://localhost:8000';
+let currentGId = localStorage.getItem('mg_guardian_id') || '';
+if (currentGId) { document.getElementById('gid-input').value = currentGId; }
+
+async function checkApi() {
+  try {
+    const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(3000) });
+    const dot = document.getElementById('api-dot');
+    const txt = document.getElementById('api-txt');
+    if (r.ok) { dot.className='api-dot ok'; txt.textContent='Backend connected'; }
+    else throw 0;
+  } catch { document.getElementById('api-dot').className='api-dot err';
+            document.getElementById('api-txt').textContent='Backend offline'; }
+}
+checkApi();
+
+function showMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text; el.className = `msg ${type}`;
+}
+
+async function login() {
+  const gid = document.getElementById('gid-input').value.trim().toUpperCase();
+  if (!gid) { showMsg('login-msg','Please enter your Guardian ID.','err'); return; }
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Loading…';
+  try {
+    const r = await fetch(`${API}/guardian/dashboard/${encodeURIComponent(gid)}`);
+    if (!r.ok) {
+      const e = await r.json();
+      throw new Error(e.detail || 'Account not found.');
+    }
+    const data = await r.json();
+    currentGId = gid;
+    localStorage.setItem('mg_guardian_id', gid);
+    renderDashboard(data);
+  } catch(e) {
+    showMsg('login-msg', `Error: ${e.message}`, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'View Dashboard';
+  }
+}
+
+async function loadDashboard() {
+  if (!currentGId) return;
+  try {
+    const r = await fetch(`${API}/guardian/dashboard/${encodeURIComponent(currentGId)}`);
+    if (r.ok) renderDashboard(await r.json());
+  } catch(e) { console.warn(e); }
+}
+
+function renderDashboard(data) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display    = 'block';
+  document.getElementById('refresh-btn').style.display  = 'inline-block';
+
+  document.getElementById('dash-title').textContent = `Welcome, ${data.guardian_name || 'Guardian'}`;
+  document.getElementById('dash-sub').textContent   = `${data.guardian_email} · ${data.total_wards} child${data.total_wards !== 1 ? 'ren' : ''} monitored`;
+  document.getElementById('gid-chip').textContent   = currentGId;
+
+  const wards = data.wards || [];
+  document.getElementById('s-wards').textContent = wards.length;
+
+  let totalCrises = 0, escalating = 0, scores = [];
+  wards.forEach(w => {
+    totalCrises += (w.recent_crises || []).length;
+    if (w.escalating) escalating++;
+    if (w.temporal_summary?.avg_score) scores.push(w.temporal_summary.avg_score);
+  });
+  document.getElementById('s-crises').textContent    = totalCrises;
+  document.getElementById('s-escalating').textContent = escalating;
+  document.getElementById('s-avg').textContent        = scores.length
+    ? (scores.reduce((a,b)=>a+b,0)/scores.length*100).toFixed(0)+'%' : '—';
+
+  const grid = document.getElementById('ward-grid');
+  if (!wards.length) {
+    grid.innerHTML = `<div class="empty-dash" style="grid-column:1/-1">
+      <div>👧🏽</div>
+      <p>No children linked yet.<br>Use the browser extension to link a child's device.</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = wards.map(w => {
+    const ts     = w.temporal_summary || {};
+    const trend  = ts.trend || 'none';
+    const avg    = ts.avg_score ? (ts.avg_score * 100).toFixed(0) : 0;
+    const tClass = trend === 'escalating' ? 'tr-escalating'
+                 : trend === 'improving'  ? 'tr-improving'
+                 : trend === 'stable'     ? 'tr-stable' : 'tr-none';
+    const tLabel = trend === 'escalating' ? '↑ Escalating'
+                 : trend === 'improving'  ? '↓ Improving'
+                 : trend === 'stable'     ? '→ Stable' : '— No data';
+    const barColor = avg >= 75 ? '#ef4444' : avg >= 50 ? '#f97316' : avg >= 25 ? '#f59e0b' : '#10b981';
+    const initials = (w.ward_name || '?').charAt(0).toUpperCase();
+    const age      = w.ward_dob ? computeAge(w.ward_dob) : '?';
+    const crises   = (w.recent_crises || []).slice(0,3);
+    const crisisHtml = crises.length
+      ? crises.map(c => `<div class="crisis-item">🚨 Score: ${(c.score*100).toFixed(0)}% · ${c.source}<div class="crisis-time">${c.timestamp?.slice(0,16).replace('T',' ')}</div></div>`).join('')
+      : '<div class="no-crisis">✓ No recent crisis alerts</div>';
+
+    return `<div class="ward-card">
+      <div class="wc-head">
+        <div class="wc-avatar">${initials}</div>
+        <div>
+          <div class="wc-name">${w.ward_name}</div>
+          <div class="wc-meta">${w.relationship} · Age ${age}</div>
+        </div>
+        <span class="wc-trend ${tClass}">${tLabel}</span>
+      </div>
+      <div class="wc-body">
+        <div class="wc-stat-row">
+          <div class="wcs"><div class="wcs-val">${ts.total || 0}</div><div class="wcs-key">Events</div></div>
+          <div class="wcs"><div class="wcs-val" style="color:#ef4444">${ts.crisis_count || 0}</div><div class="wcs-key">Crises</div></div>
+          <div class="wcs"><div class="wcs-val" style="color:#f97316">${ts.high_count || 0}</div><div class="wcs-key">High Risk</div></div>
+        </div>
+        <div style="font-size:11px;color:#4a6080;margin-bottom:4px">14-Day Avg Risk · ${avg}%</div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${avg}%;background:${barColor}"></div></div>
+        <div style="font-size:11px;color:#4a6080;margin-top:10px;margin-bottom:4px">Recent Alerts</div>
+        <div class="crisis-list">${crisisHtml}</div>
+        <div class="wc-id">Ward ID: ${w.ward_id}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function computeAge(dob) {
+  const today = new Date(), d = new Date(dob);
+  let age = today.getFullYear() - d.getFullYear();
+  if ((today.getMonth()*100+today.getDate()) < (d.getMonth()*100+d.getDate())) age--;
+  return age;
+}
+
+// Auto-login if ID saved
+if (currentGId) login();
+
+document.getElementById('gid-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
+});
+</script>
+</body>
+</html>
