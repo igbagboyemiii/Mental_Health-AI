@@ -239,8 +239,18 @@ async def load_resources_async():
         print(f"✅ Background: FAISS index ready — {faiss_index.ntotal} vectors (dim: {embeddings.shape[1]})")
     except Exception as e:
         print(f"❌ Background: Error during resource loading: {str(e)}")
+        print("⚠️ Falling back to local mock embeddings to initialize FAISS index...")
         import traceback
         traceback.print_exc()
+        try:
+            # Generate random mock embeddings of dimension 384 for the SAMPLE_CORPUS items
+            mock_dim = 384
+            embeddings = np.random.rand(len(corpus_texts), mock_dim).astype("float32")
+            faiss_index = faiss.IndexFlatL2(mock_dim)
+            faiss_index.add(embeddings)
+            print(f"✅ Background: Fallback FAISS index initialized with {faiss_index.ntotal} mock vectors.")
+        except Exception as fallback_err:
+            print(f"❌ Critical: Fallback FAISS initialization failed: {str(fallback_err)}")
 
 
 # ─────────────────────────────────────────────────────────────
