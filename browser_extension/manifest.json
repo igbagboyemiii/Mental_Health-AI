@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "MindGuard — Mental Health Monitor",
-  "version": "2.0.0",
-  "description": "Opt-in text monitoring for emotional distress detection. Connects to your local MindGuard backend.",
+  "version": "2.0.2",
+  "description": "Opt-in text monitoring for emotional distress detection. Connects to your Render MindGuard backend.",
   "permissions": [
     "activeTab",
     "storage",
@@ -10,7 +10,7 @@
     "notifications"
   ],
   "host_permissions": [
-    "http://localhost:8000/*"
+    "https://mental-health-ai-6.onrender.com/*"
   ],
   "background": {
     "service_worker": "background.js"

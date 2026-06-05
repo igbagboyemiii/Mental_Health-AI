@@ -1,7 +1,7 @@
 // popup.js — MindGuard Extension (Adolescent-First, Guardian-Ward Flow)
 'use strict';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = 'https://mental-health-ai-6.onrender.com';
 
 const TIER_COLORS = {
   none:'#6b7280', low:'#10b981', medium:'#f59e0b', high:'#f97316', crisis:'#ef4444'
@@ -367,11 +367,11 @@ async function checkHealth() {
     const resp = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(3000) });
     if (resp.ok) {
       apiDot.className      = 'api-dot online';
-      apiStatus.textContent = 'Backend connected (localhost:8000)';
+      apiStatus.textContent = 'Backend connected (Render)';
     } else throw new Error();
   } catch {
     apiDot.className      = 'api-dot offline';
-    apiStatus.textContent = 'Backend offline — start main.py';
+    apiStatus.textContent = 'Backend offline';
   }
 }
 checkHealth();

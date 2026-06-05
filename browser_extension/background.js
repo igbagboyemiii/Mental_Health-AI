@@ -12,7 +12,7 @@
 //   • Notifies guardians via /analyze/context → backend crisis trigger
 // ─────────────────────────────────────────────────────────────
 
-const API_BASE         = "http://localhost:8000";
+const API_BASE         = "https://mental-health-ai-6.onrender.com";
 const API_KEY          = "dev-secret-key-change-in-prod";
 const MAX_HISTORY      = 500;          // ~14 days of browsing
 const HISTORY_MAX_DAYS = 14;           // purge entries older than this
