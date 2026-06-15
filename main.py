@@ -1276,6 +1276,9 @@ async def guardian_dashboard_data(guardian_id: str):
     if not guardian:
         raise HTTPException(status_code=404, detail="Guardian account not found.")
 
+    if guardian.get("role") != "guardian_account":
+        raise HTTPException(status_code=400, detail="The provided ID belongs to a monitored child (Ward), not a Guardian. Please use your Guardian ID (starts with G-).")
+
     wards = db_store.get_linked_wards(guardian_id)
     ward_data = []
     for w in wards:

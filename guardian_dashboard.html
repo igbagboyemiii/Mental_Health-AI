@@ -204,7 +204,7 @@ function renderDashboard(data) {
 
   document.getElementById('dash-title').textContent = `Welcome, ${data.guardian_name || 'Guardian'}`;
   document.getElementById('dash-sub').textContent   = `${data.guardian_email} · ${data.total_wards} child${data.total_wards !== 1 ? 'ren' : ''} monitored`;
-  document.getElementById('gid-chip').textContent   = currentGId;
+  document.getElementById('gid-chip').innerHTML   = `${currentGId} &nbsp; <a href="#" onclick="logout()" style="color:#ef4444;text-decoration:underline;">Logout</a>`;
 
   const wards = data.wards || [];
   document.getElementById('s-wards').textContent = wards.length;
@@ -285,6 +285,11 @@ if (currentGId) login();
 document.getElementById('gid-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') login();
 });
+
+function logout() {
+  localStorage.removeItem('mg_guardian_id');
+  location.reload();
+}
 </script>
 </body>
 </html>
