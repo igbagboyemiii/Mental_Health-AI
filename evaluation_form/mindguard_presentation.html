@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MindGuard — Final Year Project Presentation | Adelekan Igbagboyemi Mary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary:   #6c63ff;
+      --secondary: #a78bfa;
+      --accent:    #34d399;
+      --danger:    #f87171;
+      --warning:   #fbbf24;
+      --dark:      #0a0a1a;
+      --dark2:     #12122a;
+      --dark3:     #1a1a3a;
+      --card:      rgba(255,255,255,0.06);
+      --border:    rgba(108,99,255,0.3);
+      --text:      #e2e8f0;
+      --muted:     #94a3b8;
+      --white:     #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* ── SLIDE SHELL ── */
+    .presentation {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 48px 64px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(60px);
+      transition: all 0.5s cubic-bezier(0.4,0,0.2,1);
+      background: var(--dark2);
+      overflow: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateX(0);
+    }
+
+    .slide.exit {
+      opacity: 0;
+      transform: translateX(-60px);
+    }
+
+    /* ── BACKGROUND DECORATIONS ── */
+    .slide::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+      top: -100px; right: -100px;
+      pointer-events: none;
+    }
+
+    .slide::after {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(52,211,153,0.07) 0%, transparent 70%);
+      bottom: -80px; left: -80px;
+      pointer-events: none;
+    }
+
+    /* ── SLIDE TYPES ── */
+    /* Title slide */
+    .slide-title {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: linear-gradient(135deg, #0a0a1a 0%, #12122a 50%, #0d0d25 100%);
+    }
+
+    .slide-title .badge {
+      display: inline-block;
+      background: rgba(108,99,255,0.2);
+      border: 1px solid var(--border);
+      color: var(--secondary);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+
+    .slide-title h1 {
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #fff 0%, var(--secondary) 60%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    .slide-title .subtitle {
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 400;
+      max-width: 620px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .slide-title .author-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .slide-title .author-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .slide-title .author-meta {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .slide-title .divider {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 2px;
+      margin: 24px auto;
+    }
+
+    /* Section header */
+    .slide-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 36px;
+      flex-shrink: 0;
+    }
+
+    .section-tag {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 5px 12px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .slide h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.2;
+    }
+
+    .slide h2 .accent { color: var(--primary); }
+
+    .header-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    /* Content */
+    .content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .card-grid-2 { grid-template-columns: 1fr 1fr; }
+    .card-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+
+    .card-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Bullet list */
+    .bullet-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .bullet-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--primary);
+      border-radius: 8px;
+      padding: 14px 18px;
+    }
+
+    .bullet-item .num {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      background: rgba(108,99,255,0.15);
+      border-radius: 50%;
+      min-width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .bullet-item .text { font-size: 13.5px; line-height: 1.6; color: var(--text); }
+    .bullet-item .text strong { color: var(--white); }
+    .bullet-item .cite { font-size: 11px; color: var(--primary); font-style: italic; }
+
+    /* Table */
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .styled-table thead tr {
+      background: linear-gradient(90deg, rgba(108,99,255,0.3), rgba(167,139,250,0.2));
+    }
+
+    .styled-table th {
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .styled-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(108,99,255,0.12);
+      color: var(--text);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .styled-table tr:last-child td { border-bottom: none; }
+    .styled-table tr:hover td { background: rgba(108,99,255,0.08); }
+
+    /* Metric boxes */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .metric-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 16px;
+      text-align: center;
+    }
+
+    .metric-box .metric-val {
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .metric-box .metric-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    /* SUS bar */
+    .sus-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+    }
+
+    .sus-bar-track {
+      width: 100%;
+      height: 16px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 16px 0 8px;
+      position: relative;
+    }
+
+    .sus-bar-fill {
+      height: 100%;
+      width: 69.1%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      transition: width 1s ease;
+    }
+
+    .sus-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* Arch diagram */
+    .arch-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .arch-box {
+      background: rgba(108,99,255,0.15);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .arch-arrow {
+      color: var(--primary);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    /* Risk badge */
+    .risk-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .risk-low    { background: rgba(52,211,153,0.15); color: var(--accent); }
+    .risk-mod    { background: rgba(251,191,36,0.15);  color: var(--warning); }
+    .risk-high   { background: rgba(248,113,113,0.15); color: var(--danger); }
+
+    /* Quote box */
+    .quote-box {
+      background: rgba(108,99,255,0.1);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 12px 12px 0;
+      padding: 18px 22px;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    /* Significance items */
+    .sig-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .sig-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .sig-text h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+
+    .sig-text p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Reference list */
+    .ref-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ref-item {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.5;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .ref-item::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      font-size: 16px;
+    }
+
+    .ref-item strong { color: var(--text); }
+
+    /* Acknowledgement */
+    .ack-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .ack-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .ack-card .ack-icon { font-size: 28px; margin-bottom: 8px; }
+    .ack-card h4 { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+    .ack-card p { font-size: 11px; color: var(--muted); }
+
+    /* Thank you slide */
+    .slide-thankyou {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: linear-gradient(135deg, #0a0a1a 0%, #12122a 50%, #0d0d25 100%);
+    }
+
+    .slide-thankyou h1 {
+      font-size: 64px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff 0%, var(--secondary) 60%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+
+    .slide-thankyou p {
+      font-size: 18px;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    .thankyou-chips {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      background: rgba(108,99,255,0.15);
+      border: 1px solid var(--border);
+      color: var(--secondary);
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* ── NAVIGATION ── */
+    .nav {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(10,10,26,0.9);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 10px 20px;
+      backdrop-filter: blur(16px);
+      z-index: 100;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .nav-btn {
+      background: rgba(108,99,255,0.15);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .slide-counter {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      min-width: 70px;
+      text-align: center;
+    }
+
+    .slide-title-nav {
+      font-size: 11px;
+      color: var(--primary);
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Dot indicators */
+    .nav-dots {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(108,99,255,0.3);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .dot.active {
+      width: 20px;
+      background: var(--primary);
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: width 0.4s ease;
+      z-index: 200;
+    }
+
+    /* Keyboard hint */
+    .kb-hint {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      font-size: 10px;
+      color: rgba(148,163,184,0.5);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* slide number tag */
+    .slide-num-tag {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      font-size: 11px;
+      color: rgba(108,99,255,0.4);
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Section label on left */
+    .section-label {
+      position: absolute;
+      left: -28px;
+      top: 50%;
+      transform: translateY(-50%) rotate(-90deg);
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(108,99,255,0.3);
+      white-space: nowrap;
+    }
+
+    /* Two-column layout */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      flex: 1;
+    }
+
+    .col-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    /* Objective row for methodology */
+    .obj-meth-row {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: stretch;
+    }
+
+    .obj-box {
+      background: rgba(108,99,255,0.1);
+      border: 1px solid rgba(108,99,255,0.3);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 12.5px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .obj-box .obj-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .meth-box {
+      background: rgba(52,211,153,0.07);
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 12.5px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .meth-box .meth-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    /* Conclusion box */
+    .conclusion-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .conclusion-item .tick {
+      color: var(--accent);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* ─ ANIMATION ─ */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .slide.active > * {
+      animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .slide.active > *:nth-child(1) { animation-delay: 0.05s; }
+    .slide.active > *:nth-child(2) { animation-delay: 0.15s; }
+    .slide.active > *:nth-child(3) { animation-delay: 0.25s; }
+    .slide.active > *:nth-child(4) { animation-delay: 0.35s; }
+
+    /* ── FULLSCREEN ── */
+    .fs-btn {
+      position: fixed;
+      top: 16px;
+      left: 20px;
+      background: rgba(10,10,26,0.8);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 100;
+    }
+
+    .fs-btn:hover { color: var(--white); border-color: var(--primary); }
+
+    td .gap-pill {
+      display: inline-block;
+      background: rgba(248,113,113,0.15);
+      color: var(--danger);
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    td .addr-pill {
+      display: inline-block;
+      background: rgba(52,211,153,0.15);
+      color: var(--accent);
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .highlight-row td { background: rgba(108,99,255,0.07); }
+
+    .score-pass {
+      color: var(--accent);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="kb-hint">← → Arrow Keys to Navigate</div>
+<button class="fs-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+
+<div class="presentation" id="presentation">
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 1 — TITLE
+  ══════════════════════════════════════════════════ -->
+  <div class="slide slide-title active" data-title="Title">
+    <div class="badge">Final Year BSc Project Defence · 2026</div>
+    <div style="font-size:48px; margin-bottom:16px;">🧠🛡️</div>
+    <h1>MindGuard</h1>
+    <p class="subtitle">Development of a Browser Extension for Detecting Depressive Language in Adolescents in Online Communication Using a RAG-Driven LLM</p>
+    <div class="divider"></div>
+    <div class="author-block">
+      <div class="author-name">Adelekan Igbagboyemi Mary</div>
+      <div class="author-meta">Computer Science · Final Year · 2025/2026</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 2 — INTRODUCTION / BACKGROUND
+  ══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="Introduction">
+    <div class="slide-num-tag">01</div>
+    <div class="slide-header">
+      <div class="section-tag">Introduction</div>
+      <h2>Background to the <span class="accent">Field</span></h2>
+      <div class="header-line"></div>
+    </div>
+    <div class="content">
+      <div class="card-grid card-grid-3" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-icon">🌍</div>
+          <h3>Global Mental Health Crisis</h3>
+          <p>Depression is the leading cause of disability worldwide, affecting <strong>280 million</strong> people. Adolescents are disproportionately impacted, with 1 in 7 aged 10–19 experiencing a mental disorder.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📱</div>
+          <h3>Adolescents & Online Communication</h3>
+          <p>Adolescents spend an average of <strong>7+ hours/day</strong> online. They frequently express emotional distress through written online text — often their primary outlet for self-expression.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚠️</div>
+          <h3>The Intervention Gap</h3>
+          <p>Existing mental health tools rely on <strong>active user engagement</strong>, which fails for at-risk individuals who disengage when most distressed. Early detection requires passive, non-intrusive monitoring.</p>
+        </div>
+      </div>
+      <div class="quote-box">
+        "The digital footprint left by adolescents during online communication represents an untapped early-warning signal for identifying depressive risk before it escalates to crisis." <br>
+        <span style="font-size:11px; color: var(--primary);">— Motivation for MindGuard</span>
+      </div>
+      <div class="arch-flow">
+        <div class="arch-box">👤 Adolescent writes online</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">🔍 Passive Detection</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">🤖 AI Risk Analysis</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">🔔 Guardian Alert</div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">💚 Intervention</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 3 — LITERATURE REVIEW (TABLE)
+  ══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="Literature Review">
+    <div class="slide-num-tag">02</div>
+    <div class="slide-header">
+      <div class="section-tag">Literature Review</div>
+      <h2>Key Works <span class="accent">Reviewed</span></h2>
+      <div class="header-line"></div>
+    </div>
+    <div class="content">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Author(s)</th>
+            <th>Problem Considered</th>
+            <th>Method Used</th>
+            <th>Gap Identified</th>
+            <th>Addressed by MindGuard?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Ilapaka & Ghosh (2025)</strong></td>
+            <td>AI-driven mental health chatbot for depression support</td>
+            <td>FAISS vector search + RAG + active dialogue</td>
+            <td><span class="gap-pill">Requires active user initiation</span></td>
+            <td><span class="addr-pill">✔ Passive monitoring</span></td>
+          </tr>
+          <tr class="highlight-row">
+            <td><strong>SouLLMate (Zhang et al., 2023)</strong></td>
+            <td>LLM-based emotional support for mental health</td>
+            <td>Fine-tuned LLM; overall F1 = 0.68</td>
+            <td><span class="gap-pill">No guardian escalation pathway</span></td>
+            <td><span class="addr-pill">✔ Guardian dashboard</span></td>
+          </tr>
+          <tr>
+            <td><strong>Q. Guo et al. (2024)</strong></td>
+            <td>Detection of suicidal ideation in social media</td>
+            <td>BERT-based text classification on Reddit</td>
+            <td><span class="gap-pill">Not designed for adolescents; no alerts</span></td>
+            <td><span class="addr-pill">✔ Age-targeted + alerts</span></td>
+          </tr>
+          <tr class="highlight-row">
+            <td><strong>Woebot (Fitzpatrick et al., 2022)</strong></td>
+            <td>Automated CBT chatbot for depression/anxiety</td>
+            <td>Rule-based + NLP; brief daily conversations</td>
+            <td><span class="gap-pill">Active engagement; no passive monitoring</span></td>
+            <td><span class="addr-pill">✔ Zero user effort</span></td>
+          </tr>
+          <tr>
+            <td><strong>Hollis et al. (2021)</strong></td>
+            <td>Digital mental health for young people: review</td>
+            <td>Systematic review; evidence synthesis</td>
+            <td><span class="gap-pill">Gap in passive real-time browser tools for teens</span></td>
+            <td><span class="addr-pill">✔ Browser extension</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 4 — STATEMENT OF PROBLEM
+  ══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="Statement of Problem">
+    <div class="slide-num-tag">03</div>
+    <div class="slide-header">
+      <div class="section-tag">Statement of Problem</div>
+      <h2>The <span class="accent">Problem</span> We Solve</h2>
+      <div class="header-line"></div>
+    </div>
+    <div class="content">
+      <div class="bullet-list">
+        <div class="bullet-item">
+          <div class="num">1</div>
+          <div class="text">
+            Existing mental health digital tools rely on <strong>active user engagement</strong> — apps, journaling, and chatbots only work if the user chooses to engage. Adolescents experiencing depressive episodes are the <em>least</em> likely to do so.
+            <div class="cite">(Q. Guo et al., 2024; Hollis et al., 2021)</div>
+          </div>
+        </div>
+        <div class="bullet-item">
+          <div class="num">2</div>
+          <div class="text">
+            Adolescents express distress <strong>passively and incidentally</strong> through everyday online writing — social media posts, search queries, and typed messages — yet no browser-based tool exists to capture and analyse this signal.
+            <div class="cite">(O'Reilly et al., 2023; Torous et al., 2021)</div>
+          </div>
+        </div>
+        <div class="bullet-item">
+          <div class="num">3</div>
+          <div class="text">
+            State-of-the-art detection models <strong>lack an integrated guardian/parent escalation framework</strong> — detection alone does not bridge the critical gap between identifying risk and real-world intervention.
+            <div class="cite">(Zhang et al., 2023)</div>
+          </div>
+        </div>
+        <div class="bullet-item">
+          <div class="num">4</div>
+          <div class="text">
+            Current tools are <strong>not specifically designed for adolescents</strong> and do not account for the informal, colloquial, and coded language patterns unique to teenage online communication.
+            <div class="cite">(Thabrew et al., 2022)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 5 — AIM
+  ══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="Aim">
+    <div class="slide-num-tag">04</div>
+    <div class="slide-header">
+      <div class="section-tag">Aim</div>
+      <h2>What We Set Out to <span class="accent">Achieve</span></h2>
+      <div class="header-line"></div>
+    </div>
+    <div class="content" style="align-items:center; text-align:center;">
+      <div style="max-width:700px; margin:0 auto;">
+        <div style="font-size:56px; margin-bottom:24px;">🎯</div>
+        <div style="background: rgba(108,99,255,0.1); border: 2px solid var(--border); border-radius:16px; padding:36px 48px;">
+          <p style="font-size:19px; line-height:1.7; font-weight:500; color:var(--white);">
+            To <strong style="color:var(--primary);">design, develop, and evaluate</strong> a browser extension that passively monitors online text for depressive language patterns in adolescents, using a <strong style="color:var(--accent);">RAG-driven Large Language Model</strong>, and automatically notifies designated guardians when high-risk indicators are detected.
+          </p>
+        </div>
+        <div style="display:flex; gap:12px; justify-content:center; margin-top:24px; flex-wrap:wrap;">
+          <span class="chip">🔍 Passive Monitoring</span>
+          <span class="chip">🤖 RAG + LLM</span>
+          <span class="chip">🛡️ Risk Classification</span>
+          <span class="chip">🔔 Guardian Alerts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 6 — OBJECTIVES
+  ══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="Objectives">
+    <div class="slide-num-tag">05</div>
+    <div class="slide-header">
+      <div class="section-tag">Objectives</div>
+      <h2>Steps Taken to <span class="accent">Achieve the Aim</span></h2>
+      <div class="header-line"></div>
+    </div>
+    <div class="content">
+      <div class="bullet-list">
+        <div class="bullet-item">
+          <div class="num">I</div>
+          <div class="text"><strong>Collect and pre-process</strong> a suitable dataset of depressive and non-depressive text samples representative of adolescent online communication (Dreaddit dataset; 2,838 samples).</div>
+        </div>
+        <div class="bullet-item">
+          <div class="num">II</div>
+          <div class="text"><strong>Design and develop</strong> a trained risk classification model and evaluate the accuracy and reliability of the model's risk predictions using a hybrid NLP + RAG pipeline.</div>
+        </div>
+        <div class="bullet-item">
+          <div class="num">III</div>
+          <div class="text"><strong>Implement</strong> the model within a browser extension architecture, incorporating a secure guardian notification framework and consent management system.</div>
+        </div>
+        <div class="bullet-item">
+          <div class="num">IV</div>
+          <div class="text"><strong>Evaluate</strong> the usability of the system interface using the System Usability Scale (SUS) with 24 participants from the target demographic.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 7 — METHODOLOGY
+  ══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="Methodology">
+    <div class="slide-num-tag">06</div>
+    <div class="slide-header">
+      <div class="section-tag">Methodology</div>
+      <h2>How Each Objective Was <span class="accent">Achieved</span></h2>
+      <div class="header-line"></div>
+    </div>
+    <div class="content">
+      <div class="obj-meth-row">
+        <div class="obj-box">
+          <div class="obj-label">Obj I — Dataset</div>
+          Dreaddit Reddit dataset · 2,838 samples · Colloquial adolescent-style text
+        </div>
+        <div class="meth-box">
+          <div class="meth-label">Method</div>
+          Text cleaning, stopword removal, lemmatisation. FAISS embedding index built from processed text using sentence-transformer embeddings.
+        </div>
+      </div>
+      <div class="obj-meth-row">
+        <div class="obj-box">
+          <div class="obj-label">Obj II — Model</div>
+          3-class Risk Engine: Low / Moderate / High. Hybrid NLP scoring + RAG retrieval.
+        </div>
+        <div class="meth-box">
+          <div class="meth-label">Method</div>
+          RAG Pipeline: FAISS vector search retrieves semantically similar clinical cases → LLM (Gemini 1.5 Flash) reasons over context → produces risk level + explanation. 14-day temporal window (aligned to DSM-5 criteria).
+        </div>
+      </div>
+      <div class="obj-meth-row">
+        <div class="obj-box">
+          <div class="obj-label">Obj III — System</div>
+          Browser extension (JavaScript), FastAPI backend, Guardian dashboard (HTML/JS).
+        </div>
+        <div class="meth-box">
+          <div class="meth-label">Method</div>
+          Design Science Research (DSR) methodology. Passive text interception → encrypted API call → risk classification → conditional guardian email alert with consent verification.
+        </div>
+      </div>
+      <div class="obj-meth-row">
+        <div class="obj-box">
+          <div class="obj-label">Obj IV — Evaluation</div>
+          SUS questionnaire + model benchmarking on 42-sample held-out test set.
+        </div>
+        <div class="meth-box">
+          <div class="meth-label">Method</div>
+          Quantitative: Accuracy, Precision, Recall, F1-Score, Confusion Matrix. Qualitative: 10-item SUS with 24 participants on live extension + guardian dashboard.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 8 — RESULTS: CLASSIFICATION METRICS
+  ══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="Results — Obj I & II">
+    <div class="slide-num-tag">07</div>
+    <div class="slide-header">
+      <div class="section-tag">Results</div>
+      <h2>Objective I & II — <span class="accent">Model Performance</span></h2>
+      <div class="header-line"></div>
+    </div>
+    <div class="content">
+      <div class="metrics-row">
+        <div class="metric-box">
+          <div class="metric-val">88.1%</div>
+          <div class="metric-label">Accuracy</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-val">87.4%</div>
+          <div class="metric-label">Precision</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-val">88.1%</div>
+          <div class="metric-label">Recall</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-val">87.5%</div>
+          <div class="metric-label">F1-Score</div>
+        </div>
+      </div>
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Class</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>F1-Score</th>
+            <th>Clinical Significance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="risk-badge risk-low">Low Risk</span></td>
+            <td>73.3%</td>
+            <td>84.6%</td>
+            <td>78.5%</td>
+            <td>26.7% FP rate — identified target for future improvement to reduce guardian fatigue</td>
+          </tr>
+          <tr class="highlight-row">
+            <td><span class="risk-badge risk-mod">Moderate Risk</span></td>
+            <td>90.0%</td>
+            <td>82.6%</td>
+            <td>86.1%</td>
+            <td>Strong identification of borderline cases, supporting preventative intervention</td>
+          </tr>
+          <tr>
+            <td><span class="risk-badge risk-high">High Risk</span></td>
+            <td>94.4%</td>
+            <td>94.1%</td>
+            <td>94.1%</td>
+            <td><strong class="score-pass">✔ Meets ≥90% clinical safety target.</strong> Missing a high-risk user carries severe consequences.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:14px; font-size:11.5px; color:var(--muted); display:flex; gap:20px;">
+        <span>📊 Test samples: 42 hand-curated high-variance instances</span>
+        <span>🔬 Dataset: Dreaddit (2,838 total samples)</span>
+        <span>⏱ 14-day temporal window (DSM-5 aligned)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 9 — RESULTS: SYSTEM + SUS
+  ══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="Results — Obj III & IV">
+    <div class="slide-num-tag">08</div>
+    <div class="slide-header">
+      <div class="section-tag">Results</div>
+      <h2>Objective III & IV — <span class="accent">System & Usability</span></h2>
+      <div class="header-line"></div>
+    </div>
+    <div class="content">
+      <div class="two-col">
+        <div>
+          <div class="col-label">Objective III — System Delivered</div>
+          <div class="bullet-list">
+            <div class="bullet-item" style="padding:10px 14px;">
+              <div class="num" style="font-size:18px; min-width:32px; height:32px;">🔌</div>
+              <div class="text" style="font-size:12px;"><strong>Browser Extension</strong> — Passively captures typed text. Encrypts & sends to API. Supports Chrome.</div>
+            </div>
+            <div class="bullet-item" style="padding:10px 14px;">
+              <div class="num" style="font-size:18px; min-width:32px; height:32px;">🤖</div>
+              <div class="text" style="font-size:12px;"><strong>RAG Risk Engine</strong> — FAISS retrieval + Gemini LLM classifies every text into Low / Moderate / High risk with a 3-stage mathematical formula.</div>
+            </div>
+            <div class="bullet-item" style="padding:10px 14px;">
+              <div class="num" style="font-size:18px; min-width:32px; height:32px;">🔔</div>
+              <div class="text" style="font-size:12px;"><strong>Guardian Dashboard</strong> — Real-time risk alerts. Consent management. Timeline of risk events.</div>
+            </div>
+            <div class="bullet-item" style="padding:10px 14px;">
+              <div class="num" style="font-size:18px; min-width:32px; height:32px;">🔒</div>
+              <div class="text" style="font-size:12px;"><strong>Privacy-First Design</strong> — Explicit opt-in consent. Encrypted transmission. No password capture.</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="col-label">Objective IV — SUS Usability Results</div>
+          <div class="sus-container">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Average SUS Score</div>
+                <div style="font-size:42px; font-weight:900; background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">69.1</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:11px; color:var(--muted);">24 Participants</div>
+                <div style="margin-top:4px; padding:6px 14px; background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.3); border-radius:20px; color:var(--accent); font-size:12px; font-weight:700;">Above Average</div>
+              </div>
+            </div>
+            <div class="sus-bar-track">
+              <div class="sus-bar-fill"></div>
+            </div>
+            <div class="sus-labels">
+              <span>0 — Poor</span><span>51 — Below Avg</span><span>68 — Average</span><span>80 — Good</span><span>100</span>
+            </div>
+            <div style="margin-top:16px; background:rgba(108,99,255,0.08); border:1px dashed rgba(108,99,255,0.3); border-radius:8px; padding:12px; font-size:12px; color:var(--muted); line-height:1.5;">
+              💬 <em>"User feedback highlighted a desire to see <strong style="color:var(--text);">why</strong> a risk severity was assigned — not just the severity level."</em>
+              <br><span style="color:var(--primary); font-size:11px;">→ Identified as top recommendation for future work (Explainable AI insights panel)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 10 — SIGNIFICANCE / CONTRIBUTION
+  ══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="Significance">
+    <div class="slide-num-tag">09</div>
+    <div class="slide-header">
+      <div class="section-tag">Significance</div>
+      <h2>Contribution & <span class="accent">Impact</span></h2>
+      <div class="header-line"></div>
+    </div>
+    <div class="content">
+      <div class="two-col">
+        <div>
+          <div class="col-label">For the User</div>
+          <div class="sig-item">
+            <div class="sig-icon">👧</div>
+            <div class="sig-text">
+              <h4>Zero-Effort Protection</h4>
+              <p>Adolescents receive protection without any active engagement or self-reporting — removing the biggest barrier to mental health support.</p>
+            </div>
+          </div>
+          <div class="sig-item">
+            <div class="sig-icon">👨‍👩‍👧</div>
+            <div class="sig-text">
+              <h4>Empowered Guardians</h4>
+              <p>Parents and carers receive timely, actionable alerts, enabling earlier conversations and professional referrals before crises escalate.</p>
+            </div>
+          </div>
+          <div class="sig-item">
+            <div class="sig-icon">🔒</div>
+            <div class="sig-text">
+              <h4>Privacy-First Design</h4>
+              <p>Explicit consent architecture ensures users retain full control over their data, building trust that existing monitoring tools lack.</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="col-label">For the Field</div>
+          <div class="sig-item">
+            <div class="sig-icon">🔬</div>
+            <div class="sig-text">
+              <h4>Novel RAG Application</h4>
+              <p>First application of FAISS-backed RAG retrieval to <em>passive browser telemetry</em> for adolescent mental health — a new paradigm in Digital Phenotyping.</p>
+            </div>
+          </div>
+          <div class="sig-item">
+            <div class="sig-icon">🏥</div>
+            <div class="sig-text">
+              <h4>Clinical Safety Framework</h4>
+              <p>Explicit ≥90% High-Risk Recall target aligned with clinical triage standards — bridging the gap between AI detection and clinical safety benchmarks.</p>
+            </div>
+          </div>
+          <div class="sig-item">
+            <div class="sig-icon">🔭</div>
+            <div class="sig-text">
+              <h4>Explainability Roadmap</h4>
+              <p>User-driven recommendation for an XAI Insights Panel transforms the dashboard from an alerting tool to an educational clinical instrument.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 11 — CONCLUSION
+  ══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="Conclusion">
+    <div class="slide-num-tag">10</div>
+    <div class="slide-header">
+      <div class="section-tag">Conclusion</div>
+      <h2>What Was <span class="accent">Accomplished</span></h2>
+      <div class="header-line"></div>
+    </div>
+    <div class="content">
+      <div class="conclusion-item"><span class="tick">✔</span> Developed a fully functional browser extension that passively detects depressive language in adolescents' online text with <strong>88.1% overall accuracy</strong>.</div>
+      <div class="conclusion-item"><span class="tick">✔</span> Implemented a novel <strong>RAG-driven LLM pipeline</strong> using FAISS and Gemini, achieving a clinically critical High-Risk Recall of <strong>94.1%</strong> (surpassing the ≥90% safety target).</div>
+      <div class="conclusion-item"><span class="tick">✔</span> Built a complete <strong>guardian escalation framework</strong> with a real-time dashboard, consent management, and automated risk alert notifications.</div>
+      <div class="conclusion-item"><span class="tick">✔</span> Validated usability with <strong>24 participants</strong> achieving a SUS score of <strong>69.1</strong> (Above Average) — confirming the system is accessible to non-technical users.</div>
+      <div class="conclusion-item"><span class="tick">✔</span> Identified key future work: an <strong>Explainable AI (XAI) insights panel</strong> to display linguistic triggers, improving transparency based on direct user feedback.</div>
+      <div style="margin-top:16px; background:rgba(52,211,153,0.07); border:1px solid rgba(52,211,153,0.2); border-radius:10px; padding:14px 18px; font-size:13px; color:var(--text); line-height:1.6;">
+        🎯 <strong style="color:var(--accent);">Overall:</strong> MindGuard successfully addresses the critical gap in passive, non-intrusive mental health monitoring for adolescents, demonstrating that a browser-based, RAG-augmented LLM system can detect depressive risk reliably and escalate it effectively to guardians.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 12 — REFERENCES
+  ══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="References">
+    <div class="slide-num-tag">11</div>
+    <div class="slide-header">
+      <div class="section-tag">References</div>
+      <h2>Works <span class="accent">Cited</span> in This Presentation</h2>
+      <div class="header-line"></div>
+    </div>
+    <div class="content">
+      <div class="ref-list">
+        <div class="ref-item"><strong>Q. Guo et al. (2024).</strong> Detection of suicidal ideation in social media text using BERT-based classification. <em>Journal of Biomedical Informatics.</em></div>
+        <div class="ref-item"><strong>Ilapaka, A., & Ghosh, S. (2025).</strong> RAG-enhanced conversational agents for mental health support using FAISS vector retrieval. <em>Applied Intelligence.</em></div>
+        <div class="ref-item"><strong>Zhang, Y. et al. (2023).</strong> SouLLMate: An LLM-based emotional support system for mental health applications. <em>arXiv:2305.xxxxx.</em></div>
+        <div class="ref-item"><strong>Fitzpatrick, K. K. et al. (2022).</strong> Delivering cognitive behaviour therapy to young adults with symptoms of depression via a conversational agent, Woebot. <em>JMIR Mental Health.</em></div>
+        <div class="ref-item"><strong>Hollis, C. et al. (2021).</strong> Annual research review: Digital health interventions for children and young people with mental health problems. <em>Journal of Child Psychology and Psychiatry, 62(4), 1047–1088.</em></div>
+        <div class="ref-item"><strong>Torous, J. et al. (2021).</strong> The growing field of digital psychiatry: Current evidence and the future of apps, social media, chatbots, and virtual reality. <em>World Psychiatry, 20(3), 318–335.</em></div>
+        <div class="ref-item"><strong>O'Reilly, M. et al. (2023).</strong> Examining the risk and protective associations of social media use and adolescent mental health. <em>npj Mental Health Research.</em></div>
+        <div class="ref-item"><strong>Thabrew, H. et al. (2022).</strong> Digital health interventions for adolescent mental health. <em>Child and Adolescent Mental Health, 27(2), 98–109.</em></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 13 — ACKNOWLEDGEMENT
+  ══════════════════════════════════════════════════ -->
+  <div class="slide" data-title="Acknowledgement">
+    <div class="slide-num-tag">12</div>
+    <div class="slide-header">
+      <div class="section-tag">Acknowledgement</div>
+      <h2>With Sincere <span class="accent">Gratitude</span></h2>
+      <div class="header-line"></div>
+    </div>
+    <div class="content">
+      <div class="ack-grid">
+        <div class="ack-card">
+          <div class="ack-icon">🙏</div>
+          <h4>Almighty God</h4>
+          <p>For wisdom, strength, and the grace to complete this project.</p>
+        </div>
+        <div class="ack-card">
+          <div class="ack-icon">👨‍🏫</div>
+          <h4>My Supervisor</h4>
+          <p>For patient guidance, technical mentorship, and invaluable feedback throughout this research journey.</p>
+        </div>
+        <div class="ack-card">
+          <div class="ack-icon">🏫</div>
+          <h4>Head of Department</h4>
+          <p>For providing the academic structure and resources that enabled this project.</p>
+        </div>
+        <div class="ack-card">
+          <div class="ack-icon">📚</div>
+          <h4>Faculty of Sciences</h4>
+          <p>For the academic foundation and institutional support across four years of study.</p>
+        </div>
+        <div class="ack-card">
+          <div class="ack-icon">👥</div>
+          <h4>Colleagues & Friends</h4>
+          <p>For the collaboration, encouragement, and moral support throughout the academic year.</p>
+        </div>
+        <div class="ack-card">
+          <div class="ack-icon">❤️</div>
+          <h4>Family</h4>
+          <p>For unwavering support, belief, and sacrifice that made this academic journey possible.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SLIDE 14 — THANK YOU
+  ══════════════════════════════════════════════════ -->
+  <div class="slide slide-thankyou" data-title="Thank You">
+    <div class="slide-num-tag" style="color:rgba(108,99,255,0.3);">13</div>
+    <div style="font-size:48px; margin-bottom:16px;">🧠🛡️</div>
+    <h1>Thank You</h1>
+    <p>for your time and attention.</p>
+    <div class="divider"></div>
+    <p style="font-size:14px; color:var(--muted); margin-bottom:24px; max-width:480px;">This research was conducted in partial fulfilment of the requirements for the award of BSc Computer Science.</p>
+    <div class="thankyou-chips">
+      <span class="chip">Adelekan Igbagboyemi Mary</span>
+      <span class="chip">BSc Computer Science · 2026</span>
+      <span class="chip">🛡️ MindGuard</span>
+    </div>
+  </div>
+
+</div><!-- /presentation -->
+
+<!-- ── NAVIGATION ── -->
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>◀</button>
+  <div class="nav-dots" id="navDots"></div>
+  <div class="slide-counter" id="slideCounter">1 / 14</div>
+  <button class="nav-btn" id="nextBtn" onclick="navigate(1)">▶</button>
+</div>
+
+<script>
+  const slides      = document.querySelectorAll('.slide');
+  const dotsContainer = document.getElementById('navDots');
+  const counter     = document.getElementById('slideCounter');
+  const progressBar = document.getElementById('progressBar');
+  const prevBtn     = document.getElementById('prevBtn');
+  const nextBtn     = document.getElementById('nextBtn');
+  let current       = 0;
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsContainer.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    slides[current].classList.add('exit');
+    setTimeout(() => slides[current].classList.remove('exit'), 500);
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    update();
+  }
+
+  function navigate(dir) { goTo(current + dir); }
+
+  function update() {
+    counter.textContent = `${current + 1} / ${slides.length}`;
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+    progressBar.style.width = `${((current + 1) / slides.length) * 100}%`;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === slides.length - 1;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') navigate(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                    navigate(-1);
+    if (e.key === 'Home') goTo(0);
+    if (e.key === 'End')  goTo(slides.length - 1);
+  });
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  }
+
+  update();
+</script>
+</body>
+</html>

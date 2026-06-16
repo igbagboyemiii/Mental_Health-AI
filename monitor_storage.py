@@ -345,7 +345,9 @@ class MonitorStorage:
             "ALTER TABLE user_sessions ADD COLUMN email TEXT",
             "ALTER TABLE user_sessions ADD COLUMN display_name TEXT",
             # v2 — adolescent-first: role, DOB, guardian link
-            "ALTER TABLE user_sessions ADD COLUMN role TEXT NOT NULL DEFAULT 'ward'",
+            # NOTE: SQLite ALTER TABLE ADD COLUMN cannot use NOT NULL without a
+            # constant default on older SQLite builds — use nullable form here.
+            "ALTER TABLE user_sessions ADD COLUMN role TEXT DEFAULT 'ward'",
             "ALTER TABLE user_sessions ADD COLUMN date_of_birth TEXT",
             "ALTER TABLE user_sessions ADD COLUMN guardian_user_id TEXT",
         ]
@@ -499,6 +501,29 @@ class MonitorStorage:
         )
         row = cur.fetchone()
         return dict(row) if row else None
+
+    def get_guardian_account(self, guardian_id: str) -> Optional[dict]:
+        """
+        Return a guardian_account row, or None if it does not exist or
+        if the matching row has a different role.
+        Tolerates databases where the 'role' column was added by migration
+        (it may be NULL for rows written before the migration ran).
+        """
+        cur = self._conn.execute(
+            """SELECT * FROM user_sessions
+               WHERE user_id = ?
+                 AND (role = 'guardian_account' OR role IS NULL)""",
+            (str(guardian_id),)
+        )
+        row = cur.fetchone()
+        if not row:
+            return None
+        record = dict(row)
+        # Treat a NULL role as guardian_account only when the ID prefix matches
+        # (guardian IDs are always prefixed with 'G-').
+        if record.get("role") is None and not str(guardian_id).startswith("G-"):
+            return None
+        return record
 
     def has_consented(self, user_id: str) -> bool:
         user = self.get_user(user_id)

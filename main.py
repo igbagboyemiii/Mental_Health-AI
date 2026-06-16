@@ -1158,8 +1158,8 @@ async def register_ward(req: WardRegistrationRequest):
         raise HTTPException(status_code=503, detail="Storage not initialized")
 
     # Validate guardian exists
-    guardian = db_store.get_user(req.guardian_id)
-    if not guardian or guardian.get("role") != "guardian_account":
+    guardian = db_store.get_guardian_account(req.guardian_id)
+    if not guardian:
         raise HTTPException(
             status_code=404,
             detail="Guardian account not found. Complete Step 1 first (/auth/guardian/register)."
@@ -1272,12 +1272,9 @@ async def guardian_dashboard_data(guardian_id: str):
     if db_store is None:
         raise HTTPException(status_code=503, detail="Storage not initialized")
 
-    guardian = db_store.get_user(guardian_id)
+    guardian = db_store.get_guardian_account(guardian_id)
     if not guardian:
         raise HTTPException(status_code=404, detail="Guardian account not found.")
-
-    if guardian.get("role") != "guardian_account":
-        raise HTTPException(status_code=400, detail="The provided ID belongs to a monitored child (Ward), not a Guardian. Please use your Guardian ID (starts with G-).")
 
     wards = db_store.get_linked_wards(guardian_id)
     ward_data = []

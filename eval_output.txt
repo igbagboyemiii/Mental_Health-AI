@@ -1,0 +1,182 @@
+THESIS EVALUATION REPORT
+Final Year BSc Project — Personalised Feedback
+─────────────────────────────────────────
+Student
+Adelekan Igbagboyemi Mary
+Project Title
+MindGuard: Development of a Browser Extension for Detecting Depressive Language in Adolescence in Online Communication Using a RAG-Driven LLM
+OVERALL SCORE
+31 / 50
+62%  —  Pass
+Overall Summary
+Igbagboyemi, your MindGuard project demonstrates a technically sophisticated and well-conceived system. The core architecture — passive browser monitoring, a hybrid NLP scoring engine, RAG pipeline, and guardian escalation framework — is genuinely novel and clinically motivated. The mathematical formulation of the risk engine and the benchmarking tables are highlights. However, several areas need focused attention before resubmission: a missing SUS evaluation result that is cited in both the abstract and objectives but never presented, placeholder citations that need to be replaced with real sources, and a recurring grammatical error ('adolescence' vs 'adolescents') that runs through the title itself. Address the structural gaps first, then do a careful line-by-line proofread.
+Score Breakdown
+Criterion
+Chapter
+Score
+Band
+Introduction Quality
+Chapter One
+3 / 5
+Adequate
+Statement of the Problem
+Chapter One
+3 / 5
+Adequate
+Aims and Objectives
+Chapter One
+4 / 5
+Strong
+Literature Review
+Chapter Two
+3 / 5
+Adequate
+Methodology Reporting
+Chapter Three
+3 / 5
+Adequate
+Results Completeness
+Chapter Four
+3 / 5
+Adequate
+Discussion and Evaluation
+Chapter Four
+3 / 5
+Adequate
+Conclusion Chapter
+Chapter Five
+4 / 5
+Strong
+Paragraph and Citation Quality
+Writing Quality
+2 / 5
+Needs Work
+References Quality
+Writing Quality
+3 / 5
+Adequate
+TOTAL SCORE
+31 / 50
+62%
+Pass
+Your Priority Action List
+Adelekan, here are your top priorities before resubmission:
+Paragraph and Citation Quality  (scored 2/5)
+There is a repeated grammatical error throughout the document: 'adolescence' is used where 'adolescents' is required. 'Adolescence' is a noun meaning the period of development; 'adolescents' is the plural noun for the people. E.g., 'detecting depressive language in adolescence' should be 'detecting depressive language in adolescents'. This error appears in the title, abstract, aims, and body text — it must be corrected globally.
+Introduction Quality  (scored 3/5)
+The last paragraph of Background Information (1.1) is poorly constructed: 'Therefore, adolescence and young adult being passively monitored through a browser-based data capture tool...' is a sentence fragment — it has no main verb and does not complete a coherent thought. Rewrite it as a full sentence.
+Statement of the Problem  (scored 3/5)
+The problem statement is only two paragraphs long and cites only one source (Q. Guo et al., 2024). A strong Statement of the Problem should be grounded in at least 4–6 citations to demonstrate the gap is systemic, not anecdotal.
+Literature Review  (scored 3/5)
+The chapter is primarily descriptive — it summarises what each paper or tool does, but rarely compares or contrasts them. Add a comparative analysis: e.g., 'Unlike Ilapaka & Ghosh (2025) who use FAISS for active dialogue, this study applies FAISS to passive telemetry streams.' Direct comparisons elevate the review from description to critical analysis.
+Methodology Reporting  (scored 3/5)
+The dataset justification is insufficient. You justify using Dreaddit because it 'mirrors the unstructured, colloquial nature of text' — but you never state the dataset size, class distribution, or how it was split into training and testing sets. These are fundamental dataset documentation requirements.
+Detailed Feedback by Criterion
+Each section below shows your score, what you did well, and exactly what you need to fix.
+C1  ·  Introduction Quality    ███░░  3/5    Chapter One
+✔  What you did well
+Strong funnel structure — moves from global mental health statistics down to the specific technological solution convincingly.
+Good use of statistics in the opening paragraphs, establishing urgency well.
+Background section is thematically organised and flows logically from the problem space to the proposed solution.
+✘  What you need to fix
+The last paragraph of Background Information (1.1) is poorly constructed: 'Therefore, adolescence and young adult being passively monitored through a browser-based data capture tool...' is a sentence fragment — it has no main verb and does not complete a coherent thought. Rewrite it as a full sentence.
+Several paragraphs in Section 1.1 cite the same 2–3 sources repeatedly (Cohen & Schleider, 2022 and Lehtimaki et al., 2021). Diversify citations across the background to demonstrate broader engagement with literature.
+The Research Hypothesis section is listed in the Table of Contents but is entirely missing from the document body — it does not appear anywhere between the Statement of the Problem and the Aims and Objectives. You must add this section.
+Section 1.6 (Significance of the Study) contains the sentence 'This study further enhancing the current body of work...' — the verb tense is broken. Fix grammatical errors like this throughout Chapter One.
+C2  ·  Statement of the Problem    ███░░  3/5    Chapter One
+✔  What you did well
+The core problem — active-engagement dependency in existing mental health tools — is genuine and researchable.
+The gap is clearly stated and the solution proposed (passive monitoring + guardian escalation) directly addresses it.
+✘  What you need to fix
+The problem statement is only two paragraphs long and cites only one source (Q. Guo et al., 2024). A strong Statement of the Problem should be grounded in at least 4–6 citations to demonstrate the gap is systemic, not anecdotal.
+The logical structure (what is known → what is missing → why it matters) is partially present but not explicit. Add a sentence clearly articulating *why* the absence of passive monitoring specifically harms adolescents.
+The phrase 'highlighting the existence of a model that runs invisibly at the background' is grammatically incorrect and vague. Revise: 'This highlights the need for a system that operates invisibly in the background...'
+The problem statement does not mention the guardian notification gap at all — yet this is a major claimed contribution of the project. It should be foregrounded here.
+C3  ·  Aims and Objectives    ████░  4/5    Chapter One
+✔  What you did well
+All four objectives use action verbs (collect, design, implement, evaluate) and are specific and feasible.
+The aim is clearly stated and maps cleanly to the objectives.
+Table 1.1 (Mapping of Objectives to Methods) is a strong addition and demonstrates methodological thinking.
+✘  What you need to fix
+Table 1.1, row (iv) describes the evaluation metric as the 'System Scalability Scale' — this is a typo. The correct acronym is SUS (System Usability Scale). Correct this immediately as it undermines credibility.
+Objective 2 says 'evaluate the accuracy and reliability of the model risk classification' but the word 'develop' is dropped between 'To' and 'a trained' — the sentence reads 'To develop a trained... and the accuracy...' which is grammatically incomplete. Fix the phrasing.
+The objectives do not include a guardian notification or consent framework objective, yet this is a major architectural component of the implemented system. Either add an objective for it or acknowledge in the methodology why it emerged outside the stated objectives.
+C4  ·  Literature Review    ███░░  3/5    Chapter Two
+✔  What you did well
+Good thematic coverage — all relevant concepts (AI, ML, NLP, LLMs, RAG, Digital Phenotyping) are addressed.
+The review of related works and review of existing systems are usefully separated, which aids clarity.
+The Gaps Identified in Literature section is well-argued and provides a clear link to the proposed solution.
+Good use of recent literature (2022–2025) for the core technical concepts.
+✘  What you need to fix
+The chapter is primarily descriptive — it summarises what each paper or tool does, but rarely compares or contrasts them. Add a comparative analysis: e.g., 'Unlike Ilapaka & Ghosh (2025) who use FAISS for active dialogue, this study applies FAISS to passive telemetry streams.' Direct comparisons elevate the review from description to critical analysis.
+No comparison table is present despite reviewing 4 related works and 3 existing systems. A structured table comparing systems along dimensions (active/passive, guardian alerts, age-specific, RAG-based, etc.) would significantly strengthen this chapter.
+Section 2.3.2 (Machine Learning) begins with 'It is an AI approach...' — 'It' has no antecedent since the section heading is 'Machine Learning'. Start with 'Machine Learning is an AI approach...'.
+The review of Woebot (2.5.2) mentions 'beief, daily conversations' — this is a typo for 'brief'. Proofread the chapter carefully.
+The chapter estimates at approximately 9–10 pages. For a project of this scope, 13–15 pages is expected. Expand the conceptual and critical sections.
+C5  ·  Methodology Reporting    ███░░  3/5    Chapter Three
+✔  What you did well
+Research design is clearly stated — Design Science Research (DSR) with a mixed-methods quantitative experimental evaluation is appropriate and justified.
+The two-phase framework (Model Development + Experimental Evaluation) is logical and well-structured.
+The mathematical formulation of the Risk Assessment Engine (Section 3.6.1) is a genuine strength — the three-stage formula is precise, original, and well-documented.
+Data pre-processing techniques are described in sufficient detail and the rationale for each technique is given.
+✘  What you need to fix
+The dataset justification is insufficient. You justify using Dreaddit because it 'mirrors the unstructured, colloquial nature of text' — but you never state the dataset size, class distribution, or how it was split into training and testing sets. These are fundamental dataset documentation requirements.
+The methodology does not describe how the 14-day temporal window was validated or why 14 days was chosen over 7 or 30 days. Justify design decisions quantitatively where possible.
+Section 3.3 calls requirement analysis 'requirement engineering' in the first sentence — requirement engineering is a broader discipline that includes requirements analysis as one activity. Be precise with terminology.
+There is a typo in Section 3.4: 'Retreieval-Augmented Generation' — correct to 'Retrieval-Augmented Generation'.
+The SUS evaluation methodology lacks detail. You mention using the SUS to evaluate usability but the methodology chapter never describes how many participants, what their profile was, how they were recruited, or what tasks they were given. This must be described before the evaluation chapter.
+C6  ·  Results Completeness    ███░░  3/5    Chapter Four
+✔  What you did well
+Results are presented for the core technical evaluation objective — Accuracy, Precision, Recall, F1-Score.
+The benchmarking tables (4.5 and 4.6) are well-structured and directly address the comparative dimension of the project.
+Per-class metrics table (Table 4.4) shows good diagnostic granularity.
+Interface screenshots (Figures 4.1–4.3) are appropriately referenced in the text.
+✘  What you need to fix
+Objective 4 states: 'To evaluate the usability of the model interface using the System Usability Scale (SUS).' There is NO SUS result anywhere in Chapter Four. The evaluation section only covers classification metrics (accuracy, precision, recall, F1). The SUS evaluation is entirely absent from the results — this is a critical gap that leaves one full objective unaddressed.
+The test dataset used for evaluation is never described — how many samples? What was the class distribution across Low/Moderate/High risk? Without this, the metric scores cannot be properly interpreted.
+The benchmarking table (Table 4.5) compares heterogeneous metrics across systems — some papers report Relevance and Empathy, which MindGuard does not measure. The table should include a note clarifying why certain cells are blank and acknowledging the comparison is not apple-to-apple.
+No confusion matrix is presented, despite Section 3.8 stating the evaluation is conducted using a confusion matrix analysis. Either present the matrix or remove the claim.
+C7  ·  Discussion and Evaluation    ███░░  3/5    Chapter Four
+✔  What you did well
+The benchmarking section (4.5.3) is a genuine attempt at contextualised evaluation and is the strongest part of Chapter Four.
+The feature comparison table (Table 4.6) clearly identifies how MindGuard differentiates from prior work.
+The discussion of implementation tools (Section 4.3) is detailed and tool choices are individually justified.
+✘  What you need to fix
+There is no dedicated Discussion section in Chapter Four. The evaluation results are presented (Tables 4.3 and 4.4) but never interpreted. What does 88.1% accuracy mean in the clinical context of adolescent mental health monitoring? Is it sufficient? What are the consequences of the 8.5% miss rate in the High Risk class? These interpretive questions must be answered.
+The results are not connected back to Chapter Two. The benchmarking table references prior papers but does not discuss how MindGuard's results compare *in meaning* — e.g., 'MindGuard's 94.1% High Risk F1 exceeds SouLLMate's 0.68 overall F1 because...'
+The Low Risk Precision (73.3%) is notably the weakest metric and should be explicitly discussed — what are the implications of a 26.7% false-positive rate for Low Risk classifications on user trust and guardian fatigue?
+C8  ·  Conclusion Chapter    ████░  4/5    Chapter Five
+✔  What you did well
+The summary chapter is well-structured and clearly restates the key system contributions.
+Four substantive, specific limitations are identified — this is above the minimum requirement and reflects genuine critical self-awareness.
+Recommendations are forward-looking, technically grounded, and specific (e.g., ONNX/TFLite edge processing, HL7 FHIR integration).
+The conclusion makes a clear claim of contribution and ties it back to the design choices made in the architecture.
+✘  What you need to fix
+The Summary (5.1) introduces the phrase 'active journaling' as a feature of MindGuard, but this was never described or implemented in Chapter Three or Four. Either add it to the architecture description or remove it from the summary.
+The claim in the summary that 'the system was rigorously evaluated... demonstrating high precision, high recall, and, most importantly, meeting the strict clinical safety criterion of ≥ 90% recall for high-risk, self-harm language' is problematic — the methodology set ≥90% High Risk recall as a *target*, and the result was exactly 94.1%. Acknowledge the target was met but avoid making it sound like an independently derived benchmark.
+The SUS evaluation is mentioned in the abstract as having been completed ('Qualitative evaluation using the System Usability Scale demonstrated high user trust...') but it is absent from both Chapter Four results and the Chapter Five summary. If it was not conducted, remove all references to it from the abstract and conclusion. If it was conducted, add the results.
+C9  ·  Paragraph and Citation Quality    ██░░░  2/5    Writing Quality
+✔  What you did well
+Academic register is generally well-maintained throughout the document.
+Most paragraphs in Chapters Three and Four are well-developed and multi-sentenced.
+Technical sections are precise and use appropriate terminology.
+✘  What you need to fix
+There is a repeated grammatical error throughout the document: 'adolescence' is used where 'adolescents' is required. 'Adolescence' is a noun meaning the period of development; 'adolescents' is the plural noun for the people. E.g., 'detecting depressive language in adolescence' should be 'detecting depressive language in adolescents'. This error appears in the title, abstract, aims, and body text — it must be corrected globally.
+Chapter Two, Section 2.3 heading says 'Review of Relevant Concepts' but the subsections are then numbered 2.3.1, 2.3.2, 2.3.3 — this is correct. However, sections 2.3.2 and 2.3.3 begin with 'It is a sub-discipline...' and 'It is an AI approach...' with dangling pronoun references. Always begin subsections with the subject by name.
+Section 1.1 ends with a sentence fragment (see C1 feedback). There are also 3–4 run-on sentences in Chapter Two that should be broken into separate sentences for clarity.
+The acknowledgements section contains the phrase 'my gratitude my gratitude' — a clear duplication error that was not caught in proofreading. Proofread the entire front matter carefully.
+Several paragraphs in Chapter Two (particularly 2.3.1 and 2.3.2) make claims without any citation support, e.g. 'Mental health benefiting from the advancements in ML algorithm by analyzing data retrieved from wearable devices...' — this requires a citation.
+In-text citations using the form '(Review, 2023)' and '(Problem, 2002)' in Chapters One and Two are not author names — they appear to be document-type labels used as placeholders. These must be replaced with the actual author surnames.
+C10  ·  References Quality    ███░░  3/5    Writing Quality
+✔  What you did well
+References are formatted in APA 7 style consistently throughout.
+The reference list is extensive (30+ sources) and covers a wide range of relevant literature.
+Most sources are recent — a strong majority appear to be from 2021–2025.
+✘  What you need to fix
+Two in-text citations are clearly placeholder entries and not real author names: '(Problem, 2002)' and '(Review, 2023)' appear in Chapters One and Two. The reference list confirms these are not real author citations — '(Problem, 2002)' maps to a reference beginning with 'This patient presents with a clear picture of major depression...' which is a clinical note, not a research paper. Replace these with proper peer-reviewed sources.
+The citation '(Reports, 2026)' in Section 2.2.2 is used twice. The reference entry for it in the list appears to be an 'Article in Press' with no volume, issue, or page numbers and an unusual reference format. Verify this source is published and properly formatted, or replace it.
+The reference for Bergin et al. (2013) in the list shows a 2020 DOI and journal (Npj Digital Medicine) — there is a mismatch between the in-text year (2013) and the publication details (which appear to be from 2020). Verify and correct.
+The Engineering (2017) in-text citation corresponds to a reference entry starting with 'Engineering, I. (2017)' — 'Engineering' is not an author surname. This appears to be a journal name used as an author placeholder. Identify the correct author(s) and fix the citation.
+Remove or replace bare, non-standard reference entries. At least 3 references in the list use unusual first-word abbreviations (Problem, Review, Engineering, Reports) suggesting they were auto-generated incorrectly by a reference manager. Audit the entire list.
+Final Note
+Adelekan, your score of 31/50 (62% — Pass) reflects the current state of your project. The feedback above is specific and actionable — work through each "fix" item systematically and your project will improve significantly. Good luck with your revisions.
